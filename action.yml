@@ -30,6 +30,10 @@ inputs:
   aws-secret-access-key:
     description: 'AWS Secret Access Key'
     required: true
+  path-to-repo-root:
+    description: 'Path to Repo Root'
+    required: false
+    default: ''
     
 runs:
   using: 'composite'
@@ -46,10 +50,17 @@ runs:
       shell: bash
         
     - name: Start Containerized Dependencies
-      if: inputs.use-dependencies == 'true'
+      if: (inputs.use-dependencies == 'true') && (inputs.path-to-repo-root == '')
       run: |
-        echo "Setting up docker compose"
+        echo "Running docker compose"
         docker-compose -f ${{inputs.docker-compose-file-path}} up -d
+      shell: bash
+
+    - name: Start Containerized Dependencies with Path
+      if: (inputs.use-dependencies == 'true') && (inputs.path-to-repo-root != '')
+      run: |
+        echo "Running docker compose"
+        PATH_TO_REPO_ROOT='${{ inputs.path-to-repo-root }}' docker-compose -f ${{inputs.docker-compose-file-path}} up -d
       shell: bash
 
     - name: Sonarqube Run

@@ -43,6 +43,9 @@ This parameter tells the action where to find the
 Docker compose file that defines the dependencies
 needed. Default is 'docker-compose/test-dependencies-compose.yml'
 
+#### 'path-to-repo-root' (optional)
+This parameter helps docker containers access local files in the repo.
+
 ## Sample Use
 
 ```
