@@ -9,7 +9,7 @@ inputs:
   sonar-tool-version:
     description: 'Sonar tool version'
     required: false
-    default: '5.8.0'
+    default: '5.13.0'
   use-dependencies:
     description: 'Use Docker to run dependencies.'
     required: false
