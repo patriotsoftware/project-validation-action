@@ -92,6 +92,11 @@ runs:
         GITHUB_TOKEN: ${{ inputs.github-token }}
       shell: bash
 
+    - uses: actions/upload-artifact@v3
+      with:
+        name: sonar-report
+        path: .sonarqube/out/report-task.txt
+
     - name: Output Docker Container Logs
       uses: jwalton/gh-docker-logs@v2
       if: inputs.use-dependencies == 'true' && always()
