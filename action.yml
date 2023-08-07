@@ -91,7 +91,7 @@ runs:
       run: |
         export PATH=$PATH:$HOME/.dotnet/tools
         . ~/.bashrc
-        dotnet sonarscanner end /d:sonar.token="${{inputs.sonar-token }}"
+        dotnet sonarscanner end /d:sonar.token="${{inputs.sonar-token }} /d:sonar.verbose=true"
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
       shell: bash
