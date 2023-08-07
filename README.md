@@ -46,6 +46,10 @@ needed. Default is 'docker-compose/test-dependencies-compose.yml'
 #### 'path-to-repo-root' (optional)
 This parameter helps docker containers access local files in the repo.
 
+#### 'upload-sonar-results' (optional)
+This parameter controls whether to upload Sonar results as an artifact.
+
+
 ## Sample Use
 
 ```
