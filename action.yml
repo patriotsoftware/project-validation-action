@@ -34,6 +34,10 @@ inputs:
     description: 'Path to Repo Root'
     required: false
     default: ''
+  upload-sonar-results:
+    description: 'Whether to upload Sonar results as an artifact'
+    required: false
+    default: 'false'
     
 runs:
   using: 'composite'
@@ -93,6 +97,7 @@ runs:
       shell: bash
 
     - uses: actions/upload-artifact@v3
+      if: (inputs.upload-sonar-results == 'true')
       with:
         name: sonar-report
         path: .sonarqube/out/report-task.txt
