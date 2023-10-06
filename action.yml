@@ -102,6 +102,7 @@ runs:
         echo "running dotnet tests and code coverage....."
         dotnet tool update -g dotnet-coverage
         export PATH=$PATH:$HOME/.dotnet/tools
+        . ~/.bashrc
         dotnet-coverage collect 'dotnet test --logger "trx;LogFileName=test-results.trx" --configuration Release --verbosity minimal --collect "Code Coverage" --filter TestCategory!="Smoke" --settings:test/local.runsettings' -f xml  -o 'coverage.xml'
       shell: bash
 
