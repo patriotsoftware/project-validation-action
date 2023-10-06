@@ -156,6 +156,6 @@ runs:
     - name: SonarQube Code Coverage Results
       run: |
         export BRANCH_NAME=${GITHUB_REF#refs/heads/} 
-        export REPO_NAME=${{ env.github-repo-name }}
+        export REPO_NAME=${{ inputs.github-repo-name }}
         echo "SonarQube Code Coverage Results: https://sonar.dev-internal.patriotsoftware.com/dashboard?branch=$BRANCH_NAME&id=SynergyDataSystems_$REPO_NAME"
       shell: bash
