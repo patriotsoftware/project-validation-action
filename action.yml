@@ -71,17 +71,17 @@ runs:
       shell: bash
         
     - name: Containerized Dependencies
-      if: ${{ inputs.use-dependencies == true && inputs.path-to-repo-root  == ''}}
+      if: ${{ inputs.use-dependencies == true && inputs.path-to-repo-root  == '' }}
       run: |
         echo "Running docker compose"
         docker-compose -f ${{inputs.docker-compose-file-path}} up -d
       shell: bash
 
     - name: Containerized Dependencies with Path
-      if: ${{ inputs.use-dependencies == true &&  inputs.path-to-repo-root != ''}}
+      if: ${{ inputs.use-dependencies == true &&  inputs.path-to-repo-root != '' }}
       run: |
         echo "Running docker compose"
-        PATH_TO_REPO_ROOT='${{ inputs.path-to-repo-root }}' docker-compose -f ${{inputs.docker-compose-file-path}} up -d
+        PATH_TO_REPO_ROOT='${{ inputs.path-to-repo-root }}' docker-compose -f ${{ inputs.docker-compose-file-path }} up -d
       shell: bash
 
     - name: Sonarqube Run
@@ -100,24 +100,20 @@ runs:
       
     - name: Run Tests and Code Coverage
       env:
-        AWS_ACCOUNT_ID: '305628290583'
-        AWS_REGION: 'us-east-1'
-        AWS_ACCESS_KEY_ID: ${{ inputs.aws-access-key-id }}
-        AWS_SECRET_ACCESS_KEY: ${{ inputs.aws-secret-access-key }}
         GITHUB_TOKEN: ${{ inputs.github-token }} 
       run: |        
         echo "running dotnet tests and code coverage....."
         dotnet tool update -g dotnet-coverage
         export PATH=$PATH:$HOME/.dotnet/tools
         . ~/.bashrc
-        dotnet-coverage collect 'dotnet test --logger "trx;LogFileName=test-results.trx" --configuration Release --verbosity minimal --collect "Code Coverage" --filter TestCategory!="Smoke" --settings:test/local.runsettings' -f xml  -o 'coverage.xml'
+        dotnet-coverage collect 'dotnet test --logger "trx;LogFileName=test-results.trx" --verbosity minimal --configuration Release --filter TestCategory!="Smoke" --settings:test/local.runsettings' -f xml -o 'coverage.xml'
       shell: bash
 
     - name: Sonarqube end
       run: |
         export PATH=$PATH:$HOME/.dotnet/tools
         . ~/.bashrc
-        dotnet sonarscanner end /d:sonar.token="${{inputs.sonar-token }}"
+        dotnet sonarscanner end /d:sonar.token="${{ inputs.sonar-token }}"
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
       shell: bash
