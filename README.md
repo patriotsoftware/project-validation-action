@@ -11,9 +11,8 @@ validate the quality of a project.
 
 ## Parameters
 
-#### 'sonar-project-name' (required)
-The name of the Sonar project so we can publish
-the results to the right place.
+#### 'github-repo-name' (required)
+The name of the GitHub repo name.
 
 #### 'sonar-tool-version' (optional)
 The Sonar tool version we install for this run. Default 
@@ -53,17 +52,15 @@ This parameter controls whether to upload Sonar results as an artifact.
 ## Sample Use
 
 ```
-project-validation:
-  needs: [ alert-action-started ]
-  name: "Validate Project Quality"
-  runs-on: psidev-linux
-  steps:
-  - uses: patriotsoftware/project-validation-action@v1
-    with:
-      sonar-project-name: SynergyDataSystems_PatriotSoftware.Time
-      sonar-token: ${{ secrets.SONAR_TOKEN }}
-      use-dependencies: 'true'
-      github-token: ${{ secrets.GITHUB_TOKEN }}
-      aws-access-key-id: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
-      aws-secret-access-key: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
+  project-validation:
+    name: "Sonar Validate Project Quality"
+    runs-on: psidev-linux
+    steps:
+    - uses: patriotsoftware/project-validation-action@v1.1
+      with:
+        sonar-token: ${{ secrets.SONAR_TOKEN }}
+        github-repo-name: ${{ github.event.repository.name }}   
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        aws-access-key-id: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
 ```
