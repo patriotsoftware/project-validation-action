@@ -115,7 +115,7 @@ runs:
         export PATH=$PATH:$HOME/.dotnet/tools
         export LOCAL_RUNSETTINGS=${{ inputs.local-runsettings-path }}
         . ~/.bashrc
-        if ($LOCAL_RUNSETTINGS == NONE); then
+        if [$LOCAL_RUNSETTINGS == NONE]; then
           echo "No local.runsettings file run."
           dotnet-coverage collect 'dotnet test --logger "trx;LogFileName=test-results.trx" --verbosity minimal --configuration Release --filter TestCategory!="Smoke" -f xml -o 'coverage.xml'
         else
@@ -147,12 +147,13 @@ runs:
 
     - name: Output Docker Container Logs
       uses: jwalton/gh-docker-logs@v2
-      if: ${{ inputs.use-dependencies  == true && always() }}
+      if: ${{ inputs.use-dependencies == true && always() }}
 
     - name: Smoke Tests
       if: ${{ inputs.local-runsettings-path != 'NONE' && always() }}
       run: |
-        export SMOKE_RUNSETTINGS=${{ inputs.local-runsettings-path }}
+        export SMOKE_RUNSETTINGS=${{ inputs.smoke-runsettings-path }}
+        echo "running dotnet smoke tests using $SMOKE_SETTINGS"
         dotnet test --logger 'trx;LogFileName=smoke-test-results.trx' --configuration Release --verbosity minimal --filter TestCategory=="Smoke" --settings:test/smoke.runsettings
       shell: bash
 
