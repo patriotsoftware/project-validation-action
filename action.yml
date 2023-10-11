@@ -116,7 +116,7 @@ runs:
         export LOCAL_RUNSETTINGS=${{ inputs.local-runsettings-path }}
         . ~/.bashrc
         echo "local.runsettings: $LOCAL_RUNSETTINGS"
-        if [$LOCAL_RUNSETTINGS = 'NONE']; then
+        if [ $LOCAL_RUNSETTINGS == "NONE" ]; then
           echo "No local.runsettings file run."
           dotnet-coverage collect 'dotnet test --logger "trx;LogFileName=test-results.trx" --verbosity minimal --configuration Release --filter TestCategory!="Smoke" -f xml -o 'coverage.xml'
         else
