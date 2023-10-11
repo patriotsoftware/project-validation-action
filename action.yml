@@ -150,7 +150,7 @@ runs:
       if: ${{ inputs.use-dependencies  == true && always() }}
 
     - name: Smoke Tests
-      if: ${{ input.local-runsettings-path != NONE && always() }}
+      if: ${{ inputs.local-runsettings-path != NONE && always() }}
       run: |
         export SMOKE_RUNSETTINGS=${{ inputs.local-runsettings-path }}
         dotnet test --logger 'trx;LogFileName=smoke-test-results.trx' --configuration Release --verbosity minimal --filter TestCategory=="Smoke" --settings:test/smoke.runsettings
