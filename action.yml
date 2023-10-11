@@ -41,7 +41,7 @@ inputs:
   local-runsettings-path:
     description: 'full local.runsettings file path, use NONE when file not required'
     required: false
-    default: test/local.runsettings
+    default: 'test/local.runsettings'
   upload-sonar-results:
     description: 'Whether to upload Sonar results as an artifact'
     required: false
