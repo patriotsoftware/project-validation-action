@@ -1,4 +1,4 @@
-name: 'Project Validation'
+name: 'Sonar Project Validation'
 description: 'Run Sonar and Tests to Validate Quality'
 
 inputs:
