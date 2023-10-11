@@ -118,7 +118,7 @@ runs:
         echo "local.runsettings: $LOCAL_RUNSETTINGS"
         if [ $LOCAL_RUNSETTINGS == "NONE" ]; then
           echo "No local.runsettings file run."
-          dotnet-coverage collect 'dotnet test --logger "trx;LogFileName=test-results.trx" --verbosity minimal --configuration Release --filter TestCategory!="Smoke" -f xml -o 'coverage.xml'
+          dotnet-coverage collect 'dotnet test --logger "trx;LogFileName=test-results.trx" --verbosity minimal --configuration Release --filter TestCategory!="Smoke"' -f xml -o 'coverage.xml'
         else
           echo "Using $LOCAL_RUNSETTINGS"
           dotnet-coverage collect 'dotnet test --logger "trx;LogFileName=test-results.trx" --verbosity minimal --configuration Release --filter TestCategory!="Smoke" --settings:$LOCAL_RUNSETTINGS' -f xml -o 'coverage.xml'
