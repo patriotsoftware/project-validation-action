@@ -154,6 +154,7 @@ runs:
       run: |
         export SMOKE_RUNSETTINGS=${{ inputs.local-runsettings-path }}
         dotnet test --logger 'trx;LogFileName=smoke-test-results.trx' --configuration Release --verbosity minimal --filter TestCategory=="Smoke" --settings:test/smoke.runsettings
+      shell: bash
 
     - name: Test Report
       uses: dorny/test-reporter@v1
