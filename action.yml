@@ -130,7 +130,7 @@ runs:
       run: |
         export SMOKE_RUNSETTINGS=${{ inputs.smoke-runsettings-path }}
         echo "running dotnet smoke tests using $SMOKE_RUNSETTINGS"
-        dotnet test --logger 'trx;LogFileName=smoke-test-results.trx' --configuration Release --verbosity minimal --filter "TestCategory=Smoke|TestCategory=SmokeAndIntegration" --settings:${{ inputs.smoke-runsettings-path }}
+        dotnet-coverage collect 'dotnet test --logger "trx;LogFileName=smoke-test-results.trx" --verbosity minimal --configuration Release --filter TestCategory="Smoke|TestCategory=SmokeAndIntegration" --settings:${{ inputs.smoke-runsettings-path }}' -f xml -o 'coverage.xml'
       shell: bash
 
     - name: Sonarqube end
