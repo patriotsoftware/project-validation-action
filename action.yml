@@ -125,6 +125,14 @@ runs:
         fi        
       shell: bash
 
+    - name: Smoke Tests
+      if: ${{ inputs.smoke-runsettings-path != 'NONE' && always() }}
+      run: |
+        export SMOKE_RUNSETTINGS=${{ inputs.smoke-runsettings-path }}
+        echo "running dotnet smoke tests using $SMOKE_RUNSETTINGS"
+        dotnet test --logger 'trx;LogFileName=smoke-test-results.trx' --configuration Release --verbosity minimal --filter "TestCategory=Smoke|TestCategory=SmokeAndIntegration" --settings:${{ inputs.smoke-runsettings-path }}
+      shell: bash
+
     - name: Sonarqube end
       run: |
         export PATH=$PATH:$HOME/.dotnet/tools
@@ -149,14 +157,6 @@ runs:
     - name: Output Docker Container Logs
       uses: jwalton/gh-docker-logs@v2
       if: ${{ inputs.use-dependencies == true && always() }}
-
-    - name: Smoke Tests
-      if: ${{ inputs.smoke-runsettings-path != 'NONE' && always() }}
-      run: |
-        export SMOKE_RUNSETTINGS=${{ inputs.smoke-runsettings-path }}
-        echo "running dotnet smoke tests using $SMOKE_RUNSETTINGS"
-        dotnet test --logger 'trx;LogFileName=smoke-test-results.trx' --configuration Release --verbosity minimal --filter "TestCategory=Smoke|TestCategory=SmokeAndIntegration" --settings:${{ inputs.smoke-runsettings-path }}
-      shell: bash
 
     - name: Test Report
       uses: dorny/test-reporter@v1
