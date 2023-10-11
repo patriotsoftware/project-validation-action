@@ -34,6 +34,12 @@ inputs:
     description: 'Path to Repo Root'
     required: false
     default: ''
+  smoke-runsettings-path:
+    description: 'full smoke.runsettings file path.'
+    default: 'NONE'
+  local-runsettings-path:
+    description: 'full local.runsettings file path, use NONE when file not required'
+    default: test/local.runsettings
   upload-sonar-results:
     description: 'Whether to upload Sonar results as an artifact'
     required: false
@@ -105,8 +111,15 @@ runs:
         echo "running dotnet tests and code coverage....."
         dotnet tool update -g dotnet-coverage
         export PATH=$PATH:$HOME/.dotnet/tools
+        export LOCAL_RUNSETTINGS=${{ inputs.local-runsettings-path }}
         . ~/.bashrc
-        dotnet-coverage collect 'dotnet test --logger "trx;LogFileName=test-results.trx" --verbosity minimal --configuration Release --filter TestCategory!="Smoke" --settings:test/local.runsettings' -f xml -o 'coverage.xml'
+         if ($LOCAL_RUNSETTINGS == NONE); then
+          echo "No local.runsettings file run."
+          dotnet-coverage collect 'dotnet test --logger "trx;LogFileName=test-results.trx" --verbosity minimal --configuration Release --filter TestCategory!="Smoke" -f xml -o 'coverage.xml'
+        else
+          echo "Using $LOCAL_RUNSETTINGS"
+          dotnet-coverage collect 'dotnet test --logger "trx;LogFileName=test-results.trx" --verbosity minimal --configuration Release --filter TestCategory!="Smoke" --settings:$LOCAL_RUNSETTINGS' -f xml -o 'coverage.xml'
+        fi        
       shell: bash
 
     - name: Sonarqube end
@@ -133,6 +146,12 @@ runs:
     - name: Output Docker Container Logs
       uses: jwalton/gh-docker-logs@v2
       if: ${{ inputs.use-dependencies  == true && always() }}
+
+    - name: Smoke Tests
+      if: ${{ input.local-runsettings-path != NONE && always() }}
+      run: |
+        export SMOKE_RUNSETTINGS=${{ inputs.local-runsettings-path }}
+        dotnet test --logger 'trx;LogFileName=smoke-test-results.trx' --configuration Release --verbosity minimal --filter TestCategory=="Smoke" --settings:test/smoke.runsettings
 
     - name: Test Report
       uses: dorny/test-reporter@v1
