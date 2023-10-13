@@ -1,4 +1,4 @@
-name: 'Project Validation'
+name: 'Sonar Project Validation'
 description: 'Run Sonar and Tests to Validate Quality'
 
 inputs:
@@ -34,6 +34,17 @@ inputs:
     description: 'Path to Repo Root'
     required: false
     default: ''
+  tests-path:
+    description: 'Path to tests'
+    required: false
+    default: 'test/'
+  tests-filter:
+    description: 'Tests filter for donet tests run'
+    default: 'TestCategory!="Smoke"'
+  local-runsettings-filename:
+    description: 'full local.runsettings file path, use NONE when file not required'
+    required: false
+    default: 'local.runsettings'
   upload-sonar-results:
     description: 'Whether to upload Sonar results as an artifact'
     required: false
@@ -49,6 +60,29 @@ runs:
       uses: actions/setup-java@v1
       with:
         java-version: '17'
+
+    # - name: Set local.runsettings path
+    #   id: local-run-settings
+    #   if: $${{ inputs.local-run-settings == '' }}
+    #   runs: |
+    #   echo "LOCAL_RUNSETTINGS_PATH=[Test] Add report file $(date +%d-%m-%Y)" >> $GITHUB_ENV
+
+    # - uses: dkershner6/switch-case-action@v1
+    #     id: local-run-settings
+    #     with:
+    #       default: "NONE"
+    #       conditionals-with-values: |
+    #         ${{ 'test' == 'not-test' }} => shouldnt be this one
+    #         ${{ 'test' == 'test' }} => correctAnswer
+          
+    #   - run: echo ${{ steps.switch-case.outputs.value }} # correctAnswer
+
+    - name: Cache SonarQube packages
+      uses: actions/cache@v3
+      with:
+        path: ~\sonar\cache
+        key: ${{ runner.os }}-sonar
+        restore-keys: ${{ runner.os }}-sonar
 
     - name: Dotnet Sonar Scanner Install
       run: |
@@ -105,8 +139,17 @@ runs:
         echo "running dotnet tests and code coverage....."
         dotnet tool update -g dotnet-coverage
         export PATH=$PATH:$HOME/.dotnet/tools
+        export TESTS_PATH=${{ inputs.tests-path }}
+        export LOCAL_RUNSETTINGS=$TESTS_PATH/${{ inputs.local-runsettings-filename }}
         . ~/.bashrc
-        dotnet-coverage collect 'dotnet test --logger "trx;LogFileName=test-results.trx" --verbosity minimal --configuration Release --filter TestCategory!="Smoke" --settings:test/local.runsettings' -f xml -o 'coverage.xml'
+        echo "local.runsettings: $LOCAL_RUNSETTINGS"
+        if [ $LOCAL_RUNSETTINGS == "NONE" ]; then
+          echo "No local.runsettings file run."
+          dotnet-coverage collect 'dotnet test --logger "trx;LogFileName=test-results.trx" --verbosity minimal --configuration Release --filter TestCategory!="Smoke"' -f xml -o 'coverage.xml'
+        else
+          echo "Using $LOCAL_RUNSETTINGS"
+          dotnet-coverage collect 'dotnet test --logger "trx;LogFileName=test-results.trx" --verbosity minimal --configuration Release --filter TestCategory!="Smoke" --settings:${{ inputs.local-runsettings-path }}' -f xml -o 'coverage.xml'
+        fi  
       shell: bash
 
     - name: Sonarqube end
@@ -132,7 +175,7 @@ runs:
 
     - name: Output Docker Container Logs
       uses: jwalton/gh-docker-logs@v2
-      if: ${{ inputs.use-dependencies  == true && always() }}
+      if: ${{ inputs.use-dependencies == true && always() }}
 
     - name: Test Report
       uses: dorny/test-reporter@v1
