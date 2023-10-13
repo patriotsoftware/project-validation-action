@@ -71,7 +71,6 @@ runs:
         path: ~\sonar\cache
         key: ${{ runner.os }}-sonar
         restore-keys: ${{ runner.os }}-sonar
-      shell: bash
 
     - name: Dotnet Sonar Scanner Install
       run: |
