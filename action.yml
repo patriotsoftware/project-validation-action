@@ -34,6 +34,13 @@ inputs:
     description: 'Path to Repo Root'
     required: false
     default: ''
+  tests-path:
+    description: 'Path to tests'
+    required: false
+    default: 'test/'
+  tests-filter:
+    description: 'Tests filter for donet tests run'
+    default: 'TestCategory!="Smoke"'
   smoke-runsettings-path:
     description: 'full smoke.runsettings file path.'
     required: false
@@ -57,6 +64,14 @@ runs:
       uses: actions/setup-java@v1
       with:
         java-version: '17'
+
+    - name: Cache SonarQube packages
+      uses: actions/cache@v3
+      with:
+        path: ~\sonar\cache
+        key: ${{ runner.os }}-sonar
+        restore-keys: ${{ runner.os }}-sonar
+      shell: bash
 
     - name: Dotnet Sonar Scanner Install
       run: |
