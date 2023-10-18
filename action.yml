@@ -149,7 +149,7 @@ runs:
           dotnet-coverage collect 'dotnet test --logger "trx;LogFileName=test-results.trx" --verbosity minimal --configuration Release ${ COMMAND_ARGS }' -f xml -o 'coverage.xml'
         else
           echo "Using $LOCAL_RUNSETTINGS"
-          dotnet-coverage collect 'dotnet test --logger "trx;LogFileName=test-results.trx" --verbosity minimal --configuration Release ${ COMMAND_ARGS } --settings:${{ inputs.local-runsettings-path }}' -f xml -o 'coverage.xml'
+          dotnet-coverage collect 'dotnet test --logger "trx;LogFileName=test-results.trx" --verbosity minimal --configuration Release ${ COMMAND_ARGS } --settings:${ $LOCAL_RUNSETTINGS }' -f xml -o 'coverage.xml'
         fi  
       shell: bash
 
