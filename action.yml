@@ -137,20 +137,20 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }} 
       run: |        
-        echo "running dotnet tests and code coverage....."
-        dotnet tool update -g dotnet-coverage
-        export PATH=$PATH:$HOME/.dotnet/tools
+        echo "setting variables for dotnet tests and code verage..."          
         export LOCAL_RUNSETTINGS="${{ inputs.tests-path }}${{ inputs.local-runsettings-filename }}"
-        export COMMAND_ARGS='${{ inputs.dotnet-test-command-args }}'
-        echo "local.runsettings: $LOCAL_RUNSETTINGS"
-        echo "command args: $COMMAND_ARGS"
-        . ~/.bashrc        
-        if [ $LOCAL_RUNSETTINGS != "NONE" ]; then
+        export COMMAND_ARGS='${{ inputs.dotnet-test-command-args }}'    
+         if [ $LOCAL_RUNSETTINGS != "NONE" ]; then
           echo "Using local.runsettings file."
           COMMAND_ARGS+=" --settings:$LOCAL_RUNSETTINGS"          
         fi  
         DOTNET_TEST_COMMAND=$(echo dotnet test --logger '"trx;LogFileName=test-results.trx"' --verbosity minimal --configuration Release $COMMAND_ARGS)         
-        echo "COMMAND: dotnet-coverage collect '$DOTNET_TEST_COMMAND' -f xml -o 'coverage.xml'"
+        echo "COMMAND: dotnet-coverage collect '$DOTNET_TEST_COMMAND' -f xml -o 'coverage.xml'" 
+
+        echo "running dotnet tests and code coverage....."    
+        export PATH=$PATH:$HOME/.dotnet/tools
+        dotnet tool update -g dotnet-coverage
+        . ~/.bashrc               
         dotnet-coverage collect '$DOTNET_TEST_COMMAND' -f xml -o 'coverage.xml'
       shell: bash
 
