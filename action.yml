@@ -149,7 +149,7 @@ runs:
           echo "No local.runsettings file run."
           dotnet-coverage collect 'dotnet test --logger "trx;LogFileName=test-results.trx" --verbosity minimal --configuration Release ${ COMMAND_ARGS }' -f xml -o 'coverage.xml'
         else          
-          export DOTNET_TEST_COMMAND='dotnet test --logger "trx;LogFileName=test-results.trx" --verbosity minimal --configuration Release --filter TestCategory!="Smoke" --settings:$LOCAL_RUNSETTINGS'
+          export DOTNET_TEST_COMMAND='dotnet test --logger "trx;LogFileName=test-results.trx" --verbosity minimal --configuration Release --filter TestCategory!="Smoke" --settings:${{ LOCAL_RUNSETTINGS }}'
           echo "Using $DOTNET_TEST_COMMAND"
           dotnet-coverage collect '${ DOTNET_TEST_COMMAND }' -f xml -o 'coverage.xml'
         fi  
