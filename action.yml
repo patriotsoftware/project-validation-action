@@ -141,7 +141,7 @@ runs:
         dotnet tool update -g dotnet-coverage
         export PATH=$PATH:$HOME/.dotnet/tools
         export LOCAL_RUNSETTINGS="${{ inputs.tests-path }}${{ inputs.local-runsettings-filename }}"
-        export COMMAND_ARGS=${{ inputs.dotnet-test-command-args }}
+        export COMMAND_ARGS='${{ inputs.dotnet-test-command-args }}'
         . ~/.bashrc
         echo "local.runsettings: $LOCAL_RUNSETTINGS"
         if [ $LOCAL_RUNSETTINGS == "NONE" ]; then
