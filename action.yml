@@ -78,12 +78,12 @@ runs:
           
     #   - run: echo ${{ steps.switch-case.outputs.value }} # correctAnswer
 
-    - name: Cache SonarQube packages
-      uses: actions/cache@v3
-      with:
-        path: ~\sonar\cache
-        key: ${{ runner.os }}-sonar
-        restore-keys: ${{ runner.os }}-sonar
+    #- name: Cache SonarQube packages
+    #  uses: actions/cache@v3
+    #  with:
+    #    path: ~\sonar\cache
+    #    key: ${{ runner.os }}-sonar
+    #    restore-keys: ${{ runner.os }}-sonar
 
     - name: Dotnet Sonar Scanner Install
       run: |
@@ -142,9 +142,9 @@ runs:
         export PATH=$PATH:$HOME/.dotnet/tools
         export LOCAL_RUNSETTINGS="${{ inputs.tests-path }}${{ inputs.local-runsettings-filename }}"
         export COMMAND_ARGS='${{ inputs.dotnet-test-command-args }}'
-        . ~/.bashrc
         echo "local.runsettings: $LOCAL_RUNSETTINGS"
         echo "command args: $COMMAND_ARGS"
+        . ~/.bashrc        
         if [ $LOCAL_RUNSETTINGS == "NONE" ]; then
           echo "No local.runsettings file run."
           dotnet-coverage collect 'dotnet test --logger "trx;LogFileName=test-results.trx" --verbosity minimal --configuration Release ${ COMMAND_ARGS }' -f xml -o 'coverage.xml'
@@ -177,7 +177,7 @@ runs:
 
     - name: Output Docker Container Logs
       uses: jwalton/gh-docker-logs@v2
-      if: ${{ inputs.use-dependencies == true && always() }}
+      if: ${{ inputs.use-dependencies  == true && always() }}
 
     - name: Test Report
       uses: dorny/test-reporter@v1
