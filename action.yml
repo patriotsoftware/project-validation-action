@@ -145,7 +145,7 @@ runs:
         echo "local.runsettings: $LOCAL_RUNSETTINGS"
         echo "command args: $COMMAND_ARGS"
         . ~/.bashrc        
-        if [ $LOCAL_RUNSETTINGS == "NONE" ]; then
+        if [ $LOCAL_RUNSETTINGS != "NONE" ]; then
           echo "Using local.runsettings file."
           COMMAND_ARGS+=" --settings:$LOCAL_RUNSETTINGS"          
         fi  
