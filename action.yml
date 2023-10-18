@@ -144,12 +144,13 @@ runs:
         export COMMAND_ARGS='${{ inputs.dotnet-test-command-args }}'
         . ~/.bashrc
         echo "local.runsettings: $LOCAL_RUNSETTINGS"
+        echo "command args: $COMMAND_ARGS"
         if [ $LOCAL_RUNSETTINGS == "NONE" ]; then
           echo "No local.runsettings file run."
           dotnet-coverage collect 'dotnet test --logger "trx;LogFileName=test-results.trx" --verbosity minimal --configuration Release ${ COMMAND_ARGS }' -f xml -o 'coverage.xml'
         else
           echo "Using $LOCAL_RUNSETTINGS"
-          dotnet-coverage collect 'dotnet test --logger "trx;LogFileName=test-results.trx" --verbosity minimal --configuration Release ${ COMMAND_ARGS } --settings:${ $LOCAL_RUNSETTINGS }' -f xml -o 'coverage.xml'
+          dotnet-coverage collect 'dotnet test --logger "trx;LogFileName=test-results.trx" --verbosity minimal --configuration Release --filter TestCategory!="Smoke" --settings:${ $LOCAL_RUNSETTINGS }' -f xml -o 'coverage.xml'
         fi  
       shell: bash
 
