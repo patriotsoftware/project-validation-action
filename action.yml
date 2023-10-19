@@ -144,14 +144,14 @@ runs:
           echo "Using local.runsettings file."
           COMMAND_ARGS+=" --settings:$LOCAL_RUNSETTINGS"          
         fi  
-        DOTNET_TEST_COMMAND=(dotnet test --logger '"trx;LogFileName=test-results.trx"' --verbosity minimal --configuration Release $COMMAND_ARGS)         
+        DOTNET_TEST_COMMAND=$(echo dotnet test --logger '"trx;LogFileName=test-results.trx"' --verbosity minimal --configuration Release $COMMAND_ARGS)         
         echo "COMMAND: dotnet-coverage collect '$DOTNET_TEST_COMMAND' -f xml -o 'coverage.xml'" 
 
         echo "running dotnet tests and code coverage....."    
         export PATH=$PATH:$HOME/.dotnet/tools
         dotnet tool update -g dotnet-coverage
         . ~/.bashrc               
-        dotnet-coverage collect '"${DOTNET_TEST_COMMAND[@]}"' -f xml -o 'coverage.xml'
+        dotnet-coverage collect '${DOTNET_TEST_COMMAND[@]}' -f xml -o 'coverage.xml'
       shell: bash
 
     - name: Sonarqube end
