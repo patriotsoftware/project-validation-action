@@ -41,7 +41,7 @@ inputs:
   dotnet-test-command-args:
     description: 'dotnet test command arguments'
     required: false
-    default: ''
+    default: '--filter TestCategory!="Smoke"'
   local-runsettings-filename:
     description: 'full local.runsettings file path, use NONE when file not required'
     required: false
