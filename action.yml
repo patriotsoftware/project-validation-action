@@ -78,12 +78,12 @@ runs:
           
     #   - run: echo ${{ steps.switch-case.outputs.value }} # correctAnswer
 
-    #- name: Cache SonarQube packages
-    #  uses: actions/cache@v3
-    #  with:
-    #    path: ~\sonar\cache
-    #    key: ${{ runner.os }}-sonar
-    #    restore-keys: ${{ runner.os }}-sonar
+    - name: Cache SonarQube packages
+     uses: actions/cache@v3
+     with:
+       path: ~\sonar\cache
+       key: ${{ runner.os }}-sonar
+       restore-keys: ${{ runner.os }}-sonar
 
     - name: Dotnet Sonar Scanner Install
       run: |
