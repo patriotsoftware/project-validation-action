@@ -150,14 +150,6 @@ runs:
         GITHUB_TOKEN: ${{ inputs.github-token }}
       shell: bash
 
-    - uses: sonarsource/sonarqube-quality-gate-action@master
-      timeout-minutes: 5
-      with:
-        scanMetadataReportFile: .sonarqube/out/.sonar/report-task.txt
-      env:
-        SONAR_TOKEN: ${{ inputs.sonar-token }}
-      shell: bash
-
     - name: Where Am I
       run: |
         echo "List Files/Directories"
@@ -169,6 +161,15 @@ runs:
       with:
         name: sonar-report
         path: .sonarqube/out/.sonar/report-task.txt
+
+    # Check the Quality Gate status.
+    - name: SonarQube Quality Gate check
+      id: sonarqube-quality-gate-check
+      uses: sonarsource/sonarqube-quality-gate-action@master
+      # Force to fail step after specific time.
+      timeout-minutes: 5
+      env:
+        SONAR_TOKEN: ${{ inputs.sonar-token }}
 
     - name: Output Docker Container Logs
       uses: jwalton/gh-docker-logs@v2
