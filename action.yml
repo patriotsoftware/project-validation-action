@@ -164,6 +164,8 @@ runs:
 
     - name: SonarQube Quality Gate check
       uses: sonarsource/sonarqube-quality-gate-action@master
+      env:
+        SONAR_TOKEN: ${{ inputs.sonar-token }}
       with:
         scanMetadataReportFile: .sonarqube/out/.sonar/report-task.txt
 
