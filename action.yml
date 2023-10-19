@@ -50,6 +50,10 @@ inputs:
     description: 'Whether to upload Sonar results as an artifact'
     required: false
     default: true
+  fail-on-failure:
+    description: 'set to true if you wish to fail this run when the Quality Gate is red'
+    required: false
+    default: true
     
 runs:
   using: 'composite'
@@ -164,6 +168,7 @@ runs:
 
     - name: SonarQube Quality Gate check
       uses: sonarsource/sonarqube-quality-gate-action@master
+      if: ${{ inputs.fail-on-failure == true }}
       env:
         SONAR_TOKEN: ${{ inputs.sonar-token }}
       with:
