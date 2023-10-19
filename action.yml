@@ -62,22 +62,6 @@ runs:
       with:
         java-version: '17'
 
-    # - name: Set local.runsettings path
-    #   id: local-run-settings
-    #   if: $${{ inputs.local-run-settings == '' }}
-    #   runs: |
-    #   echo "LOCAL_RUNSETTINGS_PATH=[Test] Add report file $(date +%d-%m-%Y)" >> $GITHUB_ENV
-
-    # - uses: dkershner6/switch-case-action@v1
-    #     id: local-run-settings
-    #     with:
-    #       default: "NONE"
-    #       conditionals-with-values: |
-    #         ${{ 'test' == 'not-test' }} => shouldnt be this one
-    #         ${{ 'test' == 'test' }} => correctAnswer
-          
-    #   - run: echo ${{ steps.switch-case.outputs.value }} # correctAnswer
-
     - name: Cache SonarQube packages
       uses: actions/cache@v3
       with:
