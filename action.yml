@@ -95,14 +95,14 @@ runs:
     - name: Containerized Dependencies
       if: ${{ inputs.use-dependencies == true && inputs.path-to-repo-root  == '' }}
       run: |
-        echo "Running docker compose"
+        echo "Containerized Dependencies: Running docker compose"
         docker-compose -f ${{inputs.docker-compose-file-path}} up -d
       shell: bash
 
     - name: Containerized Dependencies with Path
       if: ${{ inputs.use-dependencies == true &&  inputs.path-to-repo-root != '' }}
       run: |
-        echo "Running docker compose"
+        echo "Containerized Dependencies with Path: Running docker compose"
         PATH_TO_REPO_ROOT='${{ inputs.path-to-repo-root }}' docker-compose -f ${{ inputs.docker-compose-file-path }} up -d
       shell: bash
 
@@ -187,7 +187,7 @@ runs:
     - name: Stop Containerized Dependencies
       if: ${{ inputs.use-dependencies  == true && always() }}
       run: |
-        echo "Stopping Docker Containers"
+        echo "Containerized Dependencies: Stopping Docker Containers"
         docker-compose -f ${{inputs.docker-compose-file-path}} down -v --remove-orphans
       shell: bash
 
