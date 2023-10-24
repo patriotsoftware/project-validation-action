@@ -176,7 +176,7 @@ runs:
       if: always()
       with:
         name: Project Validation Test Results            
-        path: "${{ inputs.tests-path }}**/TestResults/**/test-results.trx"
+        path: "${{ inputs.tests-path }}**/*.trx"
         reporter: dotnet-trx
 
     - name: Stop Containerized Dependencies
