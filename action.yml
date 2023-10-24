@@ -71,6 +71,17 @@ runs:
       with:
         distribution: 'zulu'
         java-version: '17'
+
+    - name: Containerized Dependencies
+      if: ${{ inputs.use-dependencies == true }}
+      run: |
+        echo "Containerized Dependencies"
+        if inputs.path-to-repo-root == ''; then
+          echo "Running docker compose"
+        else
+          echo "Running docker compose with Path"
+        fi        
+      shell: bash
     
     - name: Dotnet Sonar Scanner Install
       run: |
