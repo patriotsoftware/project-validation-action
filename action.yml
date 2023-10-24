@@ -73,7 +73,7 @@ runs:
         java-version: '17'
 
     - name: Containerized Dependencies
-      if: ${{ inputs.use-dependencies == true }}
+      if: ${{ inputs.use-dependencies == false }}
       run: |
         echo "Containerized Dependencies"
         if inputs.path-to-repo-root == ''; then
