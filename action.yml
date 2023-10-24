@@ -71,7 +71,7 @@ runs:
       with:
         distribution: 'zulu'
         java-version: '17'
-
+    
     - name: Dotnet Sonar Scanner Install
       run: |
         if dotnet tool list -g | grep -q sonarscanner; then
@@ -95,11 +95,12 @@ runs:
     - name: Containerized Dependencies
       if: ${{ inputs.use-dependencies == true }}
       run: |
+        echo "Containerized Dependencies"
         if inputs.path-to-repo-root == ''; then
-          echo "Containerized Dependencies: Running docker compose"
+          echo "Running docker compose"
           docker-compose -f ${{inputs.docker-compose-file-path}} up -d
         else
-          echo "Containerized Dependencies with Path: Running docker compose"
+          echo "Running docker compose with Path"
           PATH_TO_REPO_ROOT='${{ inputs.path-to-repo-root }}' docker-compose -f ${{ inputs.docker-compose-file-path }} up -d
         fi        
       shell: bash
