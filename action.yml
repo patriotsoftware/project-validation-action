@@ -112,7 +112,7 @@ runs:
         GITHUB_TOKEN: ${{ inputs.github-token }} 
       run: |
         export PATH=$PATH:$HOME/.dotnet/tools
-        dotnet sonarscanner begin /k:"SynergyDataSystems_${{ inputs.github-repo-name }}" /d:sonar.scm.revision=$GITHUB_SHA /d:sonar.token=${{ inputs.sonar-token }} /d:sonar.host.url=https://sonar.dev-internal.patriotsoftware.com /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml /d:sonar.verbose=false
+        dotnet sonarscanner begin /k:"SynergyDataSystems_${{ inputs.github-repo-name }}" /d:sonar.scm.revision=$GITHUB_SHA /d:sonar.token=${{ inputs.sonar-token }} /d:sonar.host.url=https://sonar.dev-internal.patriotsoftware.com /d:sonar.cs.vscoveragexml.reportsPaths=${{ inputs.tests-path }}**/*.xml /d:sonar.verbose=false
       shell: bash
 
     - name: Project Build
