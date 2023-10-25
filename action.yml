@@ -100,12 +100,14 @@ runs:
       run: |
         echo "Containerized Dependencies Running docker compose"
         docker-compose -f ${{ inputs.docker-compose-file-path }} up -d
+      shell: bash
 
     - name: Containerized Dependencies with Path   
       if: ${{ inputs.container-dependencies == 'true' && inputs.path-to-repo-root != '' }}    
       run: |
         echo "Containerized Dependencies Running docker compose with path"
         PATH_TO_REPO_ROOT='${{ inputs.path-to-repo-root }}' docker-compose -f ${{ inputs.docker-compose-file-path }} up -d
+      shell: bash
 
     - name: Project Build
       env:
