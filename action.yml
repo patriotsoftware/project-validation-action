@@ -96,14 +96,14 @@ runs:
       shell: bash
         
     - name: Containerized Dependencies   
-      if: ${{ inputs.container-dependencies == 'true' && inputs.path-to-repo-root == '' }}    
+      if: ${{ inputs.container-dependencies == true && inputs.path-to-repo-root == '' }}    
       run: |
         echo "Containerized Dependencies Running docker compose"
         docker-compose -f ${{ inputs.docker-compose-file-path }} up -d
       shell: bash
 
     - name: Containerized Dependencies with Path   
-      if: ${{ inputs.container-dependencies == 'true' && inputs.path-to-repo-root != '' }}    
+      if: ${{ inputs.container-dependencies == true && inputs.path-to-repo-root != '' }}    
       run: |
         echo "Containerized Dependencies Running docker compose with path"
         PATH_TO_REPO_ROOT='${{ inputs.path-to-repo-root }}' docker-compose -f ${{ inputs.docker-compose-file-path }} up -d
@@ -154,14 +154,14 @@ runs:
       shell: bash
 
     - uses: actions/upload-artifact@v3
-      if: ${{ inputs.upload-sonar-results == 'true' }}
+      if: ${{ inputs.upload-sonar-results == true }}
       with:
         name: sonar-report
         path: .sonarqube/out/.sonar/report-task.txt
 
     - name: SonarQube Quality Gate check
       uses: sonarsource/sonarqube-quality-gate-action@master
-      if: ${{ inputs.fail-on-failure == 'true' }}
+      if: ${{ inputs.fail-on-failure == true }}
       env:
         SONAR_TOKEN: ${{ inputs.sonar-token }}
       with:
@@ -169,7 +169,7 @@ runs:
 
     - name: Output Docker Container Logs
       uses: jwalton/gh-docker-logs@v2
-      if: ${{ inputs.use-dependencies  == 'true' && always() }}
+      if: ${{ inputs.use-dependencies  == true && always() }}
 
     - name: Test Report
       uses: dorny/test-reporter@v1
@@ -180,7 +180,7 @@ runs:
         reporter: dotnet-trx
 
     - name: Stop Containerized Dependencies
-      if: ${{ inputs.use-dependencies  == 'true' && always() }}
+      if: ${{ inputs.use-dependencies  == true && always() }}
       run: |
         echo "Containerized Dependencies: Stopping Docker Containers"
         docker-compose -f ${{inputs.docker-compose-file-path}} down -v --remove-orphans
