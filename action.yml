@@ -86,29 +86,26 @@ runs:
           echo "Dotnet Coverage now installed."
         fi
       shell: bash
-        
-    - name: Containerized Dependencies
-      if: ${{ inputs.use-dependencies == true }}
-      run: |
-        echo "Containerized Dependencies"
-        export repo-root-path=${{ inputs.path-to-repo-root }}
-        if [ $repo-root-path == '' ]; then
-          echo "Running docker compose"
-          docker-compose -f ${{inputs.docker-compose-file-path}} up -d
-        else
-          echo "Running docker compose with Path"
-          PATH_TO_REPO_ROOT=$(echo '$repo-root-path' docker-compose -f ${{ inputs.docker-compose-file-path }} up -d)
-          echo "$PATH_TO_REPO_ROOT"
-        fi        
-      shell: bash
 
     - name: Sonarqube Run
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }} 
       run: |
         export PATH=$PATH:$HOME/.dotnet/tools
-        dotnet sonarscanner begin /k:"SynergyDataSystems_${{ inputs.github-repo-name }}" /d:sonar.scm.revision=$GITHUB_SHA /d:sonar.token=${{ inputs.sonar-token }} /d:sonar.host.url=https://sonar.dev-internal.patriotsoftware.com /d:sonar.cs.vscoveragexml.reportsPaths=${{ inputs.tests-path }}**/*.xml /d:sonar.verbose=false
+        dotnet sonarscanner begin /k:"SynergyDataSystems_${{ inputs.github-repo-name }}" /d:sonar.scm.revision=$GITHUB_SHA /d:sonar.token=${{ inputs.sonar-token }} /d:sonar.host.url=https://sonar.dev-internal.patriotsoftware.com /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml /d:sonar.verbose=false
       shell: bash
+        
+    - name: Containerized Dependencies   
+      if: ${{ inputs.container-dependencies == 'true' && inputs.path-to-repo-root == '' }}    
+      run: |
+        echo "Containerized Dependencies Running docker compose"
+        docker-compose -f ${{ inputs.docker-compose-file-path }} up -d
+
+    - name: Containerized Dependencies with Path   
+      if: ${{ inputs.container-dependencies == 'true' && inputs.path-to-repo-root != '' }}    
+      run: |
+        echo "Containerized Dependencies Running docker compose with path"
+        PATH_TO_REPO_ROOT='${{ inputs.path-to-repo-root }}' docker-compose -f ${{ inputs.docker-compose-file-path }} up -d
 
     - name: Project Build
       env:
@@ -120,7 +117,7 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }} 
       run: |        
-        echo "setting variables for dotnet tests and code verage..."          
+        echo "setting variables for dotnet tests and code coverage..."          
         export LOCAL_RUNSETTINGS="${{ inputs.tests-path }}${{ inputs.local-runsettings-filename }}"
         export COMMAND_ARGS='${{ inputs.dotnet-test-command-args }}'    
          if [ $LOCAL_RUNSETTINGS != "NONE" ]; then
@@ -155,14 +152,14 @@ runs:
       shell: bash
 
     - uses: actions/upload-artifact@v3
-      if: ${{ inputs.upload-sonar-results == true }}
+      if: ${{ inputs.upload-sonar-results == 'true' }}
       with:
         name: sonar-report
         path: .sonarqube/out/.sonar/report-task.txt
 
     - name: SonarQube Quality Gate check
       uses: sonarsource/sonarqube-quality-gate-action@master
-      if: ${{ inputs.fail-on-failure == true }}
+      if: ${{ inputs.fail-on-failure == 'true' }}
       env:
         SONAR_TOKEN: ${{ inputs.sonar-token }}
       with:
@@ -170,7 +167,7 @@ runs:
 
     - name: Output Docker Container Logs
       uses: jwalton/gh-docker-logs@v2
-      if: ${{ inputs.use-dependencies  == true && always() }}
+      if: ${{ inputs.use-dependencies  == 'true' && always() }}
 
     - name: Test Report
       uses: dorny/test-reporter@v1
@@ -181,7 +178,7 @@ runs:
         reporter: dotnet-trx
 
     - name: Stop Containerized Dependencies
-      if: ${{ inputs.use-dependencies  == true && always() }}
+      if: ${{ inputs.use-dependencies  == 'true' && always() }}
       run: |
         echo "Containerized Dependencies: Stopping Docker Containers"
         docker-compose -f ${{inputs.docker-compose-file-path}} down -v --remove-orphans
