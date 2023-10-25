@@ -54,10 +54,6 @@ inputs:
     description: 'set to true if you wish to fail this run when the Quality Gate is red'
     required: false
     default: true
-  install-java:
-    description: 'install Java option'
-    required: false
-    default: true
     
 runs:
   using: 'composite'
@@ -66,7 +62,6 @@ runs:
       uses: actions/checkout@v3
               
     - name: Java Install
-      if: ${{ inputs.install-java == true }}
       uses: actions/setup-java@v3
       with:
         distribution: 'zulu'
