@@ -120,11 +120,12 @@ runs:
         GITHUB_TOKEN: ${{ inputs.github-token }} 
       run: |        
         echo "setting variables for dotnet tests and code coverage..."          
-        export LOCAL_RUNSETTINGS="${{ inputs.tests-path }}${{ inputs.local-runsettings-filename }}"
+        export LOCAL_RUNSETTINGS="${{ inputs.local-runsettings-filename }}"
+        export TESTS_PATH="${{ inputs.tests-path }}"
         export COMMAND_ARGS='${{ inputs.dotnet-test-command-args }}'    
          if [ $LOCAL_RUNSETTINGS != "NONE" ]; then
-          echo "Using local.runsettings file."
-          COMMAND_ARGS+=" --settings:$LOCAL_RUNSETTINGS"          
+          echo "Using local.runsettings file."          
+          COMMAND_ARGS+=" --settings:$TESTS_PATH$LOCAL_RUNSETTINGS"          
         fi  
         DOTNET_TEST_COMMAND=$(echo dotnet test --logger '"trx;LogFileName=test-results.trx"' --verbosity minimal --configuration Release $COMMAND_ARGS)       
         
