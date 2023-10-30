@@ -17,16 +17,10 @@ inputs:
   docker-compose-file-path:
     description: 'Path to docker compose file to start dependencies'
     required: false
-    default: 'docker-compose/test-dependencies-compose.yml'
-  github-token:
-    description: 'Github Token'
-    required: true
+    default: 'docker-compose/test-dependencies-compose.yml'  
   sonar-token:
     description: 'Sonar Token'
-    required: true
-  aws-access-key-id:
-    description: 'AWS Access Key ID'
-    required: true
+    required: true 
   aws-secret-access-key:
     description: 'AWS Secret Access Key'
     required: true
@@ -88,8 +82,6 @@ runs:
       shell: bash
 
     - name: Sonarqube Run
-      env:
-        GITHUB_TOKEN: ${{ inputs.github-token }} 
       run: |
         export PATH=$PATH:$HOME/.dotnet/tools
         dotnet sonarscanner begin /k:"SynergyDataSystems_${{ inputs.github-repo-name }}" /d:sonar.scm.revision=$GITHUB_SHA /d:sonar.token=${{ inputs.sonar-token }} /d:sonar.host.url=https://sonar.dev-internal.patriotsoftware.com /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml /d:sonar.verbose=false
@@ -110,14 +102,10 @@ runs:
       shell: bash
 
     - name: Project Build
-      env:
-        GITHUB_TOKEN: ${{ inputs.github-token }} 
       run: dotnet build  
       shell: bash
       
     - name: Run Tests and Code Coverage
-      env:
-        GITHUB_TOKEN: ${{ inputs.github-token }} 
       run: |        
         echo "setting variables for dotnet tests and code coverage..."          
         export LOCAL_RUNSETTINGS="${{ inputs.local-runsettings-filename }}"
@@ -144,8 +132,6 @@ runs:
         export PATH=$PATH:$HOME/.dotnet/tools
         . ~/.bashrc
         dotnet sonarscanner end /d:sonar.token="${{ inputs.sonar-token }}"
-      env:
-        GITHUB_TOKEN: ${{ inputs.github-token }}
       shell: bash
 
     - name: Where Am I
