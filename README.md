@@ -1,7 +1,7 @@
 # project-validation-action
 
 This action is intended to share a common set of steps we use to
-validate the quality of a project.
+validate the quality of a project on SonarQube.
 
 - Checkout the code
 - Start Sonar
@@ -19,18 +19,6 @@ The Sonar tool version we install for this run. Default
 is 5.8.0 but this param will allow one to override if
 needed.
 
-#### 'sonar-token' (required)
-The secret Sonar token for authenticating with Sonar.
-
-#### 'github-token' (required)
-The secret Github token for authenticating with Github.
-
-#### 'aws-access-key-id' (required)
-The AWS access key id, should always be for dev.
-
-#### 'aws-secret-access-key' (required)
-The AWS secret access key, should always be for dev.
-
 #### 'use-dependencies' (optional)
 Tests can be ran with dependencies if needed. Dependencies
 can be defined in a docker compose file. And this switch
@@ -42,12 +30,36 @@ This parameter tells the action where to find the
 Docker compose file that defines the dependencies
 needed. Default is 'docker-compose/test-dependencies-compose.yml'
 
+#### 'github-token' (required)
+The secret Github token for authenticating with Github.
+
+#### 'sonar-token' (required)
+The secret Sonar token for authenticating with Sonar.
+
+#### 'aws-access-key-id' (required)
+The AWS access key id, should always be for dev.
+
+#### 'aws-secret-access-key' (required)
+The AWS secret access key, should always be for dev.
+
 #### 'path-to-repo-root' (optional)
 This parameter helps docker containers access local files in the repo.
 
+#### 'tests-path' (optional)
+The path to .NET tests by default is 'test/'
+
+#### 'dotnet-test-command-args' (optional)
+Arguments set on 'dotnet test' command arguments
+
+#### 'local-runsettings-filename' (optional)
+Full 'local.runsettings' file path, use NONE when file not required
+
 #### 'upload-sonar-results' (optional)
 This parameter controls whether to upload Sonar results as an artifact.
+default is '--filter TestCategory!="Smoke"'
 
+#### 'fail-on-failure' (optional)
+Quality Gate will turn red and fail. Set to 'true' by default.  
 
 ## Sample Use
 
