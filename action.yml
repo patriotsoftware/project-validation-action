@@ -1,4 +1,4 @@
-name: 'Project Validation'
+name: 'Sonar Project Validation'
 description: 'Run Sonar and Tests to Validate Quality'
 
 inputs:
@@ -17,25 +17,32 @@ inputs:
   docker-compose-file-path:
     description: 'Path to docker compose file to start dependencies'
     required: false
-    default: 'docker-compose/test-dependencies-compose.yml'
-  github-token:
-    description: 'Github Token'
-    required: true
+    default: 'docker-compose/test-dependencies-compose.yml'  
   sonar-token:
     description: 'Sonar Token'
-    required: true
-  aws-access-key-id:
-    description: 'AWS Access Key ID'
-    required: true
-  aws-secret-access-key:
-    description: 'AWS Secret Access Key'
-    required: true
+    required: true 
   path-to-repo-root:
     description: 'Path to Repo Root'
     required: false
     default: ''
+  tests-path:
+    description: 'Path to tests'
+    required: false
+    default: 'test/'
+  dotnet-test-command-args:
+    description: 'dotnet test command arguments'
+    required: false
+    default: '--filter TestCategory!="Smoke"'
+  local-runsettings-filename:
+    description: 'full local.runsettings file path, use NONE when file not required'
+    required: false
+    default: 'local.runsettings'
   upload-sonar-results:
     description: 'Whether to upload Sonar results as an artifact'
+    required: false
+    default: true
+  fail-on-failure:
+    description: 'set to true if you wish to fail this run when the Quality Gate is red'
     required: false
     default: true
     
@@ -44,12 +51,13 @@ runs:
   steps:
     - name: Checkout code
       uses: actions/checkout@v3
-    
+              
     - name: Java Install
-      uses: actions/setup-java@v1
+      uses: actions/setup-java@v3
       with:
+        distribution: 'zulu'
         java-version: '17'
-
+    
     - name: Dotnet Sonar Scanner Install
       run: |
         if dotnet tool list -g | grep -q sonarscanner; then
@@ -69,44 +77,51 @@ runs:
           echo "Dotnet Coverage now installed."
         fi
       shell: bash
-        
-    - name: Containerized Dependencies
-      if: ${{ inputs.use-dependencies == true && inputs.path-to-repo-root  == '' }}
-      run: |
-        echo "Running docker compose"
-        docker-compose -f ${{inputs.docker-compose-file-path}} up -d
-      shell: bash
-
-    - name: Containerized Dependencies with Path
-      if: ${{ inputs.use-dependencies == true &&  inputs.path-to-repo-root != '' }}
-      run: |
-        echo "Running docker compose"
-        PATH_TO_REPO_ROOT='${{ inputs.path-to-repo-root }}' docker-compose -f ${{ inputs.docker-compose-file-path }} up -d
-      shell: bash
 
     - name: Sonarqube Run
-      env:
-        GITHUB_TOKEN: ${{ inputs.github-token }} 
       run: |
         export PATH=$PATH:$HOME/.dotnet/tools
         dotnet sonarscanner begin /k:"SynergyDataSystems_${{ inputs.github-repo-name }}" /d:sonar.scm.revision=$GITHUB_SHA /d:sonar.token=${{ inputs.sonar-token }} /d:sonar.host.url=https://sonar.dev-internal.patriotsoftware.com /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml /d:sonar.verbose=false
       shell: bash
+        
+    - name: Containerized Dependencies   
+      if: ${{ inputs.use-dependencies == 'true' && inputs.path-to-repo-root == '' }}    
+      run: |
+        echo "Containerized Dependencies Running docker compose"
+        docker-compose -f ${{ inputs.docker-compose-file-path }} up -d
+      shell: bash
+
+    - name: Containerized Dependencies with Path   
+      if: ${{ inputs.use-dependencies == 'true' && inputs.path-to-repo-root != '' }}    
+      run: |
+        echo "Containerized Dependencies Running docker compose with path"
+        PATH_TO_REPO_ROOT='${{ inputs.path-to-repo-root }}' docker-compose -f ${{ inputs.docker-compose-file-path }} up -d
+      shell: bash
 
     - name: Project Build
-      env:
-        GITHUB_TOKEN: ${{ inputs.github-token }} 
       run: dotnet build  
       shell: bash
       
     - name: Run Tests and Code Coverage
-      env:
-        GITHUB_TOKEN: ${{ inputs.github-token }} 
       run: |        
-        echo "running dotnet tests and code coverage....."
+        echo "setting variables for dotnet tests and code coverage..."          
+        export LOCAL_RUNSETTINGS="${{ inputs.local-runsettings-filename }}"
+        export TESTS_PATH="${{ inputs.tests-path }}"
+        export COMMAND_ARGS='${{ inputs.dotnet-test-command-args }}'    
+         if [ $LOCAL_RUNSETTINGS != "NONE" ]; then
+          echo "Using local.runsettings file."          
+          COMMAND_ARGS+=" --settings:$TESTS_PATH$LOCAL_RUNSETTINGS"          
+        fi  
+        DOTNET_TEST_COMMAND=$(echo dotnet test --logger '"trx;LogFileName=test-results.trx"' --verbosity minimal --configuration Release $COMMAND_ARGS)       
+        
+        echo "running dotnet tests and code coverage....."    
+        echo "COMMAND: dotnet-coverage collect '$DOTNET_TEST_COMMAND' -f xml -o 'coverage.xml'" 
+
+        # command execution
         dotnet tool update -g dotnet-coverage
-        export PATH=$PATH:$HOME/.dotnet/tools
-        . ~/.bashrc
-        dotnet-coverage collect 'dotnet test --logger "trx;LogFileName=test-results.trx" --verbosity minimal --configuration Release --filter TestCategory!="Smoke" --settings:test/local.runsettings' -f xml -o 'coverage.xml'
+        export PATH=$PATH:$HOME/.dotnet/tools        
+        . ~/.bashrc               
+        eval dotnet-coverage collect '$DOTNET_TEST_COMMAND' -f xml -o 'coverage.xml'
       shell: bash
 
     - name: Sonarqube end
@@ -114,8 +129,6 @@ runs:
         export PATH=$PATH:$HOME/.dotnet/tools
         . ~/.bashrc
         dotnet sonarscanner end /d:sonar.token="${{ inputs.sonar-token }}"
-      env:
-        GITHUB_TOKEN: ${{ inputs.github-token }}
       shell: bash
 
     - name: Where Am I
@@ -125,27 +138,35 @@ runs:
       shell: bash
 
     - uses: actions/upload-artifact@v3
-      if: ${{ inputs.upload-sonar-results == true }}
+      if: ${{ inputs.upload-sonar-results == 'true' }}
       with:
         name: sonar-report
         path: .sonarqube/out/.sonar/report-task.txt
 
+    - name: SonarQube Quality Gate check
+      uses: sonarsource/sonarqube-quality-gate-action@master
+      if: ${{ inputs.fail-on-failure == 'true' }}
+      env:
+        SONAR_TOKEN: ${{ inputs.sonar-token }}
+      with:
+        scanMetadataReportFile: .sonarqube/out/.sonar/report-task.txt
+
     - name: Output Docker Container Logs
       uses: jwalton/gh-docker-logs@v2
-      if: ${{ inputs.use-dependencies  == true && always() }}
+      if: ${{ inputs.use-dependencies == 'true' && always() }}
 
     - name: Test Report
       uses: dorny/test-reporter@v1
       if: always()
       with:
         name: Project Validation Test Results            
-        path: test/**/TestResults/**/test-results.trx
+        path: "${{ inputs.tests-path }}**/*.trx"
         reporter: dotnet-trx
 
     - name: Stop Containerized Dependencies
-      if: ${{ inputs.use-dependencies  == true && always() }}
+      if: ${{ inputs.use-dependencies == 'true' && always() }}
       run: |
-        echo "Stopping Docker Containers"
+        echo "Containerized Dependencies: Stopping Docker Containers"
         docker-compose -f ${{inputs.docker-compose-file-path}} down -v --remove-orphans
       shell: bash
 
