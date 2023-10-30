@@ -21,9 +21,6 @@ inputs:
   sonar-token:
     description: 'Sonar Token'
     required: true 
-  aws-secret-access-key:
-    description: 'AWS Secret Access Key'
-    required: true
   path-to-repo-root:
     description: 'Path to Repo Root'
     required: false
