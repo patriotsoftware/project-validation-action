@@ -30,17 +30,8 @@ This parameter tells the action where to find the
 Docker compose file that defines the dependencies
 needed. Default is 'docker-compose/test-dependencies-compose.yml'
 
-#### 'github-token' (required)
-The secret Github token for authenticating with Github.
-
 #### 'sonar-token' (required)
 The secret Sonar token for authenticating with Sonar.
-
-#### 'aws-access-key-id' (required)
-The AWS access key id, should always be for dev.
-
-#### 'aws-secret-access-key' (required)
-The AWS secret access key, should always be for dev.
 
 #### 'path-to-repo-root' (optional)
 This parameter helps docker containers access local files in the repo.
@@ -72,7 +63,4 @@ Quality Gate will turn red and fail. Set to 'true' by default.
       with:
         sonar-token: ${{ secrets.SONAR_TOKEN }}
         github-repo-name: ${{ github.event.repository.name }}   
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        aws-access-key-id: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
 ```
