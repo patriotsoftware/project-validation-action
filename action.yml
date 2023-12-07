@@ -51,32 +51,6 @@ runs:
   steps:
     - name: Checkout code
       uses: actions/checkout@v3
-              
-    - name: Java Install
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'zulu'
-        java-version: '17'
-    
-    - name: Dotnet Sonar Scanner Install
-      run: |
-        if dotnet tool list -g | grep -q sonarscanner; then
-          echo "Sonar Scanner Already Installed"
-        else
-          dotnet tool install --global dotnet-sonarscanner --version ${{inputs.sonar-tool-version}}
-          echo "Sonar Scanner now installed."
-        fi
-      shell: bash
-
-    - name: Dotnet Coverage Install
-      run: | 
-        if dotnet tool list -g | grep -q dotnet-coverage; then
-          echo "Dotnet Coverage Already Installed"
-        else
-          dotnet tool install -g dotnet-coverage
-          echo "Dotnet Coverage now installed."
-        fi
-      shell: bash
 
     - name: Sonarqube Run
       run: |
