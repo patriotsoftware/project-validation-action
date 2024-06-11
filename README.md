@@ -52,6 +52,9 @@ default is '--filter TestCategory!="Smoke"'
 #### 'fail-on-failure' (optional)
 Quality Gate will turn red and fail. Set to 'true' by default.  
 
+#### 'ignore-failures' (optional)
+When value is 'sonar' it will ignore the Sonar Quality Gate
+
 ## Sample Use
 
 ```
