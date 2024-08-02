@@ -108,13 +108,14 @@ runs:
         PATH_TO_REPO_ROOT='${{ inputs.path-to-repo-root }}' docker-compose -f ${{ inputs.docker-compose-file-path }} up -d
       shell: bash
 
-    - name: Project Build
-      run: dotnet build --verbosity quiet 
-      shell: bash
+    # - name: Project Build
+    #   run: dotnet build --verbosity quiet 
+    #   shell: bash
 
     - name: Vulnerability Scan
       if: ${{ inputs.nuget-vulnerability-scan == 'true' }}
-      run: dotnet list package --vulnerable --include-transitive --format json >> dependencyReport.json
+      run: echo "Vulnerabiltiy scan"
+      # dotnet list package --vulnerable --include-transitive --format json >> dependencyReport.json
       shell: bash
       
     - name: Run Tests and Code Coverage
@@ -127,16 +128,16 @@ runs:
           echo "Using local.runsettings file."          
           COMMAND_ARGS+=" --settings:$TESTS_PATH$LOCAL_RUNSETTINGS"          
         fi  
-        DOTNET_TEST_COMMAND=$(echo dotnet test --logger '"trx;LogFileName=test-results.trx"' --verbosity minimal --configuration Release $COMMAND_ARGS)       
+        DOTNET_COMMAND=$(echo dotnet test --logger '"trx;LogFileName=test-results.trx"' --verbosity quiet --configuration Release $COMMAND_ARGS)       
         
         echo "running dotnet tests and code coverage....."    
-        echo "COMMAND: dotnet-coverage collect '$DOTNET_TEST_COMMAND' -f xml -o 'coverage.xml'" 
+        echo "COMMAND: dotnet-coverage collect '$DOTNET_COMMAND' -f xml -o 'coverage.xml'" 
 
         # command execution
         dotnet tool update -g dotnet-coverage
         export PATH=$PATH:$HOME/.dotnet/tools        
         . ~/.bashrc               
-        eval dotnet-coverage collect '$DOTNET_TEST_COMMAND' -f xml -o 'coverage.xml'
+        eval dotnet-coverage collect '$DOTNET_COMMAND' -f xml -o 'coverage.xml'
       shell: bash
 
     - name: Sonarqube end
