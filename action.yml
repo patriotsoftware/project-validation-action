@@ -114,7 +114,7 @@ runs:
 
     - name: Vulnerability Scan
       if: ${{ inputs.nuget-vulnerability-scan == 'true' }}
-      run: dotnet list package --vulnerable --include-transitive --format json
+      run: dotnet list package --vulnerable --include-transitive --format json >> dependencyReport.json
       shell: bash
       
     - name: Run Tests and Code Coverage
@@ -144,12 +144,6 @@ runs:
         export PATH=$PATH:$HOME/.dotnet/tools
         . ~/.bashrc
         dotnet sonarscanner end /d:sonar.token="${{ inputs.sonar-token }}"
-      shell: bash
-
-    - name: Where Am I
-      run: |
-        echo "List Files/Directories"
-        ls
       shell: bash
 
     - uses: actions/upload-artifact@v4
