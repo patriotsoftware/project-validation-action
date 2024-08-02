@@ -121,13 +121,13 @@ runs:
         DOTNET_COMMAND=$(echo dotnet test --logger '"trx;LogFileName=test-results.trx"' --verbosity quiet --configuration Release $COMMAND_ARGS)       
         
         echo "running dotnet tests and code coverage....."    
-        echo "COMMAND: dotnet-coverage collect '$DOTNET_COMMAND && dotnet list package –vulnerable' -f xml -o 'coverage.xml'" 
+        echo "COMMAND: dotnet-coverage collect '$DOTNET_COMMAND' -f xml -o 'coverage.xml'" 
 
         # command execution
         dotnet tool update -g dotnet-coverage
         export PATH=$PATH:$HOME/.dotnet/tools        
         . ~/.bashrc               
-        eval dotnet-coverage collect '$DOTNET_COMMAND' -f xml -o 'coverage.xml'
+        eval dotnet-coverage collect 'dotnet list package --vulnerable --include-transitive --format json && $DOTNET_COMMAND' -f xml -o 'coverage.xml'
       shell: bash
 
     # - name: Vulnerability Scan
