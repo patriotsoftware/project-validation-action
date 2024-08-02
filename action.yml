@@ -49,6 +49,10 @@ inputs:
     description: 'Ignore Sonar Quality Gate. Set sonar'
     required: false
     default: ''
+  nuget-vulnerability-scan:
+    description: 'Nuget package vulnerability scan'
+    required: false
+    default: false
     
 runs:
   using: 'composite'
@@ -105,7 +109,12 @@ runs:
       shell: bash
 
     - name: Project Build
-      run: dotnet build  
+      run: dotnet build --verbosity quiet 
+      shell: bash
+
+    - name: Vulnerability Scan
+      if: ${{ inputs.nuget-vulnerability-scan == 'true' }}
+      run: dotnet list package --vulnerable --include-transitive --format json
       shell: bash
       
     - name: Run Tests and Code Coverage
