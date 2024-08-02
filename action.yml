@@ -107,16 +107,6 @@ runs:
         echo "Containerized Dependencies Running docker compose with path"
         PATH_TO_REPO_ROOT='${{ inputs.path-to-repo-root }}' docker-compose -f ${{ inputs.docker-compose-file-path }} up -d
       shell: bash
-
-    # - name: Project Build
-    #   run: dotnet build --verbosity quiet 
-    #   shell: bash
-
-    - name: Vulnerability Scan
-      if: ${{ inputs.nuget-vulnerability-scan == 'true' }}
-      run: echo "Vulnerabiltiy scan"
-      # dotnet list package --vulnerable --include-transitive --format json >> dependencyReport.json
-      shell: bash
       
     - name: Run Tests and Code Coverage
       run: |        
@@ -138,6 +128,11 @@ runs:
         export PATH=$PATH:$HOME/.dotnet/tools        
         . ~/.bashrc               
         eval dotnet-coverage collect '$DOTNET_COMMAND' -f xml -o 'coverage.xml'
+      shell: bash
+
+    - name: Vulnerability Scan
+      if: ${{ inputs.nuget-vulnerability-scan == 'true' }}
+      run: dotnet list package --vulnerable --include-transitive --format json >> dependencyReport.json
       shell: bash
 
     - name: Sonarqube end
