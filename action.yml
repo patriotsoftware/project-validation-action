@@ -49,10 +49,6 @@ inputs:
     description: 'Ignore Sonar Quality Gate. Set sonar'
     required: false
     default: ''
-  nuget-vulnerability-scan:
-    description: 'Nuget package vulnerability scan'
-    required: false
-    default: false
     
 runs:
   using: 'composite'
@@ -130,10 +126,18 @@ runs:
         eval dotnet-coverage collect 'dotnet list package --vulnerable --include-transitive --format json && $DOTNET_COMMAND' -f xml -o 'coverage.xml'
       shell: bash
 
-    # - name: Vulnerability Scan
-    #   if: ${{ inputs.nuget-vulnerability-scan == 'true' }}
-    #   run: dotnet list package --vulnerable --include-transitive --format json >> dependencyReport.json
-    #   shell: bash
+    - name: Vulnerability Scan
+      id: vulnerability_scan
+      continue-on-error: true
+      run: |          
+        dotnet list package --vulnerable --include-transitive 2>&1 | tee build.log
+        echo "Analyze dotnet list package command log output..."
+        grep -q -i "critical\|high\|moderate\|low" build.log; [ $? -eq 0 ] && echo "Security Vulnerabilities found on the log output" && exit 1
+          
+    - name: Vulnerability Failure
+      if: ${{ steps.vulnerability_scan.outcome == 'failure'}}
+      run: |
+        echo "Vulnerability Failure status: FAILED"
 
     - name: Sonarqube end
       run: |
@@ -147,6 +151,8 @@ runs:
       with:
         name: sonar-report
         path: .sonarqube/out/.sonar/report-task.txt
+
+    - run: cat .sonarqube/out/.sonar/report-task.txt
 
     - name: SonarQube Quality Gate check
       uses: sonarsource/sonarqube-quality-gate-action@master
