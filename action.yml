@@ -133,11 +133,13 @@ runs:
         dotnet list package --vulnerable --include-transitive 2>&1 | tee build.log
         echo "Analyze dotnet list package command log output..."
         grep -q -i "critical\|high\|moderate\|low" build.log; [ $? -eq 0 ] && echo "Security Vulnerabilities found on the log output" && exit 1
+      shell: bash
           
     - name: Vulnerability Failure
       if: ${{ steps.vulnerability_scan.outcome == 'failure'}}
       run: |
         echo "Vulnerability Failure status: FAILED"
+      shell: bash
 
     - name: Sonarqube end
       run: |
