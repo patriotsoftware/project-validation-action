@@ -154,9 +154,6 @@ runs:
         name: sonar-report
         path: .sonarqube/out/.sonar/report-task.txt
 
-    - run: cat .sonarqube/out/.sonar/report-task.txt
-      shell: bash
-
     - name: SonarQube Quality Gate check
       uses: sonarsource/sonarqube-quality-gate-action@master
       if: ${{ (inputs.fail-on-failure == 'true') || (inputs.ignore-failures != 'sonar') }}
