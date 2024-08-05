@@ -123,7 +123,7 @@ runs:
         dotnet tool update -g dotnet-coverage
         export PATH=$PATH:$HOME/.dotnet/tools        
         . ~/.bashrc               
-        eval dotnet-coverage collect 'dotnet list package --vulnerable --include-transitive --format json && $DOTNET_COMMAND' -f xml -o 'coverage.xml'
+        eval dotnet-coverage collect '$DOTNET_COMMAND' -f xml -o 'coverage.xml'
       shell: bash
 
     - name: Vulnerability Scan
