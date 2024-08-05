@@ -126,6 +126,11 @@ runs:
         eval dotnet-coverage collect '$DOTNET_COMMAND' -f xml -o 'coverage.xml'
       shell: bash
 
+#Vulnerability scan options:
+# - Issue an alert or post outside GitHub a Vulnerability scan status
+# - Fail run based on vulnerabilities found or levels 
+#     - dotnet restore PatriotSoftware.Templates.Api.Spg.sln --verbosity quiet /warnaserror:NU1902,NU1903,NU1904
+# - Create custom rule (code changes involved) and import to Sonar 
     - name: Vulnerability Scan
       id: vulnerability_scan
       continue-on-error: true
@@ -134,8 +139,7 @@ runs:
         echo "Analyze dotnet list package command log output..."
         grep -q -i "critical\|high\|moderate\|low" build.log; [ $? -eq 0 ] && echo "Security Vulnerabilities found on the log output" && exit 1
       shell: bash
-          
-   #TODO: We can add alerts or update repo status somewhere outsides GitHub       
+                
     - name: Vulnerability Status
       if: ${{ steps.vulnerability_scan.outcome == 'failure'}}
       run: |
