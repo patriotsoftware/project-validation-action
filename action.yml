@@ -138,10 +138,10 @@ runs:
     - name: Vulnerability Scan
       id: vulnerability_scan
       env:
-        solution: '${{ inputs.github-repo-name }}'
+        project: '${{ inputs.github-repo-name }}'
       continue-on-error: true
       run: |          
-        dotnet list ${{ inputs.github-repo-name }}.sln package --vulnerable --include-transitive 2>&1 | tee build.log
+        dotnet list /tmp/$project/$project/$project.sln package --vulnerable --include-transitive 2>&1 | tee build.log
         echo "Analyze dotnet list package command log output..."
         grep -q -i "critical\|high\|moderate\|low" build.log; [ $? -eq 0 ] && echo "Security Vulnerabilities found on the log output" && exit 1
       shell: bash
