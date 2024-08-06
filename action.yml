@@ -145,7 +145,7 @@ runs:
       continue-on-error: true
       run: |
         echo "Vulnerability status: FAILED"
-        dotnet list package --vulnerable --include-transitive
+        dotnet list **/*.csproj package --vulnerable --include-transitive
       shell: bash
 
     - name: Sonarqube end
