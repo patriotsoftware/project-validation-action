@@ -117,7 +117,7 @@ runs:
         dotnet tool update -g dotnet-coverage
         export PATH=$PATH:$HOME/.dotnet/tools        
         . ~/.bashrc               
-        eval dotnet-coverage collect '$DOTNET_COMMAND' -f xml -o 'coverage.xml'
+        eval dotnet-coverage collect '$DOTNET_COMMAND' -f xml -o 'coverage.xml' 2>&1 | tee build.log
       shell: bash
 
     - name: Directory Listing
@@ -129,21 +129,22 @@ runs:
 # - Fail run based on vulnerabilities found or levels 
 #     - dotnet restore PatriotSoftware.Templates.Api.Spg.sln --verbosity quiet /warnaserror:NU1902,NU1903,NU1904
 # - Create custom rule (code changes involved) and import to Sonar 
+#    dotnet list $project.sln package --vulnerable --include-transitive 2>&1 | tee build.log
     - name: Vulnerability Scan
       id: vulnerability_scan
       env:
         project: '${{ inputs.github-repo-name }}'
       continue-on-error: true
-      run: |          
-        dotnet list $project.sln package --vulnerable --include-transitive 2>&1 | tee build.log
+      run: |
         echo "Analyze dotnet list package command log output..."
-        grep -q -i "critical\|high\|moderate\|low" build.log; [ $? -eq 0 ] && echo "Security Vulnerabilities found on the log output" && exit 1
+        grep -q -i "NU1902\|NU1903\|NU1904" build.log; [ $? -eq 0 ] && echo "Security Vulnerabilities found on the log output" && exit 1
       shell: bash
                 
     - name: Vulnerability Status
       if: ${{ steps.vulnerability_scan.outcome == 'failure'}}
       run: |
         echo "Vulnerability status: FAILED"
+        dotnet list package --vulnerable --include-transitive
       shell: bash
 
     - name: Sonarqube end
