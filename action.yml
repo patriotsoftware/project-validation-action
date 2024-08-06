@@ -49,6 +49,9 @@ inputs:
     description: 'Ignore Sonar Quality Gate. Set sonar'
     required: false
     default: ''
+  vulnerability_codes:
+    description: 'Pipe delimited vulnerabilities to look for on build.log output'
+    default: 'NU1902|NU1903|NU1904'
     
 runs:
   using: 'composite'
@@ -120,13 +123,6 @@ runs:
         eval dotnet-coverage collect '$DOTNET_COMMAND' -f xml -o 'coverage.xml' 2>&1 | tee build.log
       shell: bash
 
-    - name: Display build.log
-      run: |
-        echo "<<<<<START build.log>>>>>"
-        cat build.log
-        echo "<<<<<END build.log>>>>>"
-      shell: bash
-
 #Vulnerability scan options:
 # - Issue an alert or post outside GitHub a Vulnerability scan status
 # - Fail run based on vulnerabilities found or levels 
@@ -136,11 +132,14 @@ runs:
 # use continue-on-error=true setting
 #   grep -q -i "NU1903|NU1904" build.log; [ $? -eq 0 ] && echo "Security Vulnerabilities found on the log output" && exit 1
     - name: Vulnerability Scan
-      id: vulnerability_scan      
+      id: vulnerability_scan
+      if: ${{ inputs.vulnerability_codes != '' }}
+      env:
+        vulns: ${{ inputs.vulnerability_codes }}      
       continue-on-error: true
       run: |
-        echo "Analyze command log output..."
-        grep -qE "NU1902|NU1903|NU1904" build.log && echo "Security Vulnerabilities found on the log output" && exit 1 || echo "No, nothing found. All is well."        
+        echo "Analyze command build.log output..."
+        grep -qE $vulns build.log && echo "Security Vulnerabilities matching $vulns found on the log output" && exit 1 || echo "No matched vulnerabilities found."        
       shell: bash
                 
     - name: Vulnerability Status
