@@ -131,9 +131,7 @@ runs:
 # - Create custom rule (code changes involved) and import to Sonar 
 #    dotnet list $project.sln package --vulnerable --include-transitive 2>&1 | tee build.log
     - name: Vulnerability Scan
-      id: vulnerability_scan
-      env:
-        project: '${{ inputs.github-repo-name }}'
+      id: vulnerability_scan      
       continue-on-error: true
       run: |
         echo "Analyze dotnet list package command log output..."
@@ -142,10 +140,12 @@ runs:
                 
     - name: Vulnerability Status
       if: ${{ steps.vulnerability_scan.outcome == 'failure'}}
+      env:
+        project: '${{ inputs.github-repo-name }}'
       continue-on-error: true
       run: |
         echo "Vulnerability status: FAILED"
-        dotnet list /tmp/PatriotSoftware.Payroll.Taxes.Configuration/PatriotSoftware.Payroll.Taxes.Configuration/PatriotSoftware.Payroll.Taxes.Configuration.sln package --vulnerable --include-transitive
+        dotnet list /tmp/$solution/$solution/$solution.sln package --vulnerable --include-transitive
       shell: bash
 
     - name: Sonarqube end
