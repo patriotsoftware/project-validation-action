@@ -141,12 +141,10 @@ runs:
                 
     - name: Vulnerability Status
       if: ${{ steps.vulnerability_scan.outcome == 'failure'}}
-      env:
-        project: '${{ inputs.github-repo-name }}'
       continue-on-error: true
       run: |
         echo "Vulnerability status: FAILED"
-        dotnet list /tmp/$project/$project/$project.sln package --vulnerable --include-transitive
+        dotnet list package --vulnerable --include-transitive
       shell: bash
 
     - name: Sonarqube end
