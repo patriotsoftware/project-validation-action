@@ -135,7 +135,7 @@ runs:
       id: vulnerability_scan      
       continue-on-error: true
       run: |
-        echo "Analyze dotnet list package command log output..."
+        echo "Analyze command log output..."
         grep -q -i "NU1902\|NU1903\|NU1904" build.log; [ $? -eq 0 ] && echo "Security Vulnerabilities found on the log output" && exit 1
       shell: bash
                 
