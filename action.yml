@@ -130,6 +130,7 @@ runs:
 #     - dotnet restore PatriotSoftware.Templates.Api.Spg.sln --verbosity quiet /warnaserror:NU1902,NU1903,NU1904
 # - Create custom rule (code changes involved) and import to Sonar 
 #    dotnet list $project.sln package --vulnerable --include-transitive 2>&1 | tee build.log
+# use continue-on-error=true setting
     - name: Vulnerability Scan
       id: vulnerability_scan      
       continue-on-error: true
