@@ -58,11 +58,11 @@ runs:
       with:
         fetch-depth: 0  # Disable shallow-clone so Sonar can do git-blame
               
-    - name: Java Install
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'zulu'
-        java-version: '17'
+    # - name: Java Install
+    #   uses: actions/setup-java@v4
+    #   with:
+    #     distribution: 'zulu'
+    #     java-version: '17'
     
     - name: Dotnet Sonar Scanner Install
       run: |
