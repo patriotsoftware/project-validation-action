@@ -142,14 +142,6 @@ runs:
         grep -qE $vulns build.log && echo "Security Vulnerabilities matching $vulns found on build.log output" && exit 1 || echo "No matched vulnerabilities found."        
       shell: bash
                 
-    - name: Vulnerability Status
-      if: ${{ steps.vulnerability_scan.outcome == 'failure'}}
-      continue-on-error: true
-      run: |
-        echo "Vulnerability status: FAILED"
-        dotnet list package --vulnerable --include-transitive
-      shell: bash
-
     - name: Sonarqube end
       run: |
         export PATH=$PATH:$HOME/.dotnet/tools
@@ -188,6 +180,14 @@ runs:
       run: |
         echo "Containerized Dependencies: Stopping Docker Containers"
         docker-compose -f ${{inputs.docker-compose-file-path}} down -v --remove-orphans
+      shell: bash
+
+    - name: Vulnerability Status
+      if: ${{ steps.vulnerability_scan.outcome == 'failure'}}
+      continue-on-error: true
+      run: |
+        echo "Vulnerability status: FAILED"
+        dotnet list package --vulnerable --include-transitive
       shell: bash
 
     - name: SonarQube Code Coverage Results
