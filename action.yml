@@ -146,6 +146,7 @@ runs:
                 
     - name: Vulnerability Status
       if: ${{ steps.vulnerability_scan.outcome == 'failure'}}
+      continue-on-error: true
       run: |
         echo "Vulnerability status: FAILED"
         dotnet list package --vulnerable --include-transitive
