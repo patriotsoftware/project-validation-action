@@ -134,13 +134,13 @@ runs:
 # - Create custom rule (code changes involved) and import to Sonar 
 #    dotnet list $project.sln package --vulnerable --include-transitive 2>&1 | tee build.log
 # use continue-on-error=true setting
+#   grep -q -i "NU1903|NU1904" build.log; [ $? -eq 0 ] && echo "Security Vulnerabilities found on the log output" && exit 1
     - name: Vulnerability Scan
       id: vulnerability_scan      
       continue-on-error: true
       run: |
         echo "Analyze command log output..."
-        grep -qE "NU1903|NU1904" build.log && echo "Yes, found a vulnerability" || echo "No, nothing found. All is well."
-        grep -q -i "NU1903|NU1904" build.log; [ $? -eq 0 ] && echo "Security Vulnerabilities found on the log output" && exit 1
+        grep -qE "NU1902|NU1903|NU1904" build.log && echo "Security Vulnerabilities found on the log output" && exit 1 || echo "No, nothing found. All is well."        
       shell: bash
                 
     - name: Vulnerability Status
