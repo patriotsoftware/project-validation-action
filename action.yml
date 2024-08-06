@@ -139,7 +139,7 @@ runs:
       continue-on-error: true
       run: |
         echo "Analyze command build.log output..."
-        grep -qE $vulns build.log && echo "Security Vulnerabilities matching $vulns found on the log output" && exit 1 || echo "No matched vulnerabilities found."        
+        grep -qE $vulns build.log && echo "Security Vulnerabilities matching $vulns found on build.log output" && exit 1 || echo "No matched vulnerabilities found."        
       shell: bash
                 
     - name: Vulnerability Status
