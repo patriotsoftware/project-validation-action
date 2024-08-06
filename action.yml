@@ -120,10 +120,6 @@ runs:
         eval dotnet-coverage collect '$DOTNET_COMMAND' -f xml -o 'coverage.xml' 2>&1 | tee build.log
       shell: bash
 
-    # - name: Directory Listing
-    #   run: ls -LR
-    #   shell: bash
-
 #Vulnerability scan options:
 # - Issue an alert or post outside GitHub a Vulnerability scan status
 # - Fail run based on vulnerabilities found or levels 
