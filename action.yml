@@ -137,9 +137,11 @@ runs:
 # - Create custom rule (code changes involved) and import to Sonar 
     - name: Vulnerability Scan
       id: vulnerability_scan
+      env:
+        solution: '${{ inputs.github-repo-name }}'
       continue-on-error: true
       run: |          
-        dotnet list package ${{ inputs.github-repo-name }}.sln --vulnerable --include-transitive 2>&1 | tee build.log
+        dotnet list package $solution.sln --vulnerable --include-transitive 2>&1 | tee build.log
         echo "Analyze dotnet list package command log output..."
         grep -q -i "critical\|high\|moderate\|low" build.log; [ $? -eq 0 ] && echo "Security Vulnerabilities found on the log output" && exit 1
       shell: bash
