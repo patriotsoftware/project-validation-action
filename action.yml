@@ -124,10 +124,6 @@ runs:
     #   run: ls -LR
     #   shell: bash
 
-    - name: Display build.log
-      run: cat build.log
-      shell: bash
-
 #Vulnerability scan options:
 # - Issue an alert or post outside GitHub a Vulnerability scan status
 # - Fail run based on vulnerabilities found or levels 
