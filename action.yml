@@ -49,6 +49,9 @@ inputs:
     description: 'Ignore Sonar Quality Gate. Set sonar'
     required: false
     default: ''
+  vulnerability_codes:
+    description: 'Pipe delimited vulnerabilities to look for on build.log output'
+    default: 'NU1902|NU1903|NU1904'
     
 runs:
   using: 'composite'
@@ -57,12 +60,6 @@ runs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0  # Disable shallow-clone so Sonar can do git-blame
-              
-    - name: Java Install
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'zulu'
-        java-version: '17'
     
     - name: Dotnet Sonar Scanner Install
       run: |
@@ -103,10 +100,6 @@ runs:
         echo "Containerized Dependencies Running docker compose with path"
         PATH_TO_REPO_ROOT='${{ inputs.path-to-repo-root }}' docker-compose -f ${{ inputs.docker-compose-file-path }} up -d
       shell: bash
-
-    - name: Project Build
-      run: dotnet build  
-      shell: bash
       
     - name: Run Tests and Code Coverage
       run: |        
@@ -118,29 +111,44 @@ runs:
           echo "Using local.runsettings file."          
           COMMAND_ARGS+=" --settings:$TESTS_PATH$LOCAL_RUNSETTINGS"          
         fi  
-        DOTNET_TEST_COMMAND=$(echo dotnet test --logger '"trx;LogFileName=test-results.trx"' --verbosity minimal --configuration Release $COMMAND_ARGS)       
+        DOTNET_COMMAND=$(echo dotnet test --logger '"trx;LogFileName=test-results.trx"' --verbosity quiet --configuration Release $COMMAND_ARGS)       
         
         echo "running dotnet tests and code coverage....."    
-        echo "COMMAND: dotnet-coverage collect '$DOTNET_TEST_COMMAND' -f xml -o 'coverage.xml'" 
+        echo "COMMAND: dotnet-coverage collect '$DOTNET_COMMAND' -f xml -o 'coverage.xml'" 
 
         # command execution
         dotnet tool update -g dotnet-coverage
         export PATH=$PATH:$HOME/.dotnet/tools        
         . ~/.bashrc               
-        eval dotnet-coverage collect '$DOTNET_TEST_COMMAND' -f xml -o 'coverage.xml'
+        eval dotnet-coverage collect '$DOTNET_COMMAND' -f xml -o 'coverage.xml' 2>&1 | tee build.log
       shell: bash
 
+#Vulnerability scan options:
+# - Issue an alert or post outside GitHub a Vulnerability scan status
+# - Fail run based on vulnerabilities found or levels 
+#     - dotnet restore PatriotSoftware.Templates.Api.Spg.sln --verbosity quiet /warnaserror:NU1902,NU1903,NU1904
+# - Create custom rule (code changes involved) and import to Sonar 
+#    dotnet list $project.sln package --vulnerable --include-transitive 2>&1 | tee build.log
+# 
+# other notes:
+#   use continue-on-error=true setting
+#   grep -q -i "NU1903|NU1904" build.log; [ $? -eq 0 ] && echo "Security Vulnerabilities found on the log output" && exit 1
+    - name: Vulnerability Scan
+      id: vulnerability_scan
+      if: ${{ inputs.vulnerability_codes != '' }}
+      env:
+        vulns: ${{ inputs.vulnerability_codes }}      
+      continue-on-error: true
+      run: |
+        echo "Analyze command build.log output..."
+        grep -qE $vulns build.log && echo "Security Vulnerabilities matching $vulns found on build.log output" && exit 1 || echo "No matched vulnerabilities found."        
+      shell: bash
+                
     - name: Sonarqube end
       run: |
         export PATH=$PATH:$HOME/.dotnet/tools
         . ~/.bashrc
         dotnet sonarscanner end /d:sonar.token="${{ inputs.sonar-token }}"
-      shell: bash
-
-    - name: Where Am I
-      run: |
-        echo "List Files/Directories"
-        ls
       shell: bash
 
     - uses: actions/upload-artifact@v4
@@ -174,6 +182,14 @@ runs:
       run: |
         echo "Containerized Dependencies: Stopping Docker Containers"
         docker-compose -f ${{inputs.docker-compose-file-path}} down -v --remove-orphans
+      shell: bash
+
+    - name: Vulnerability Status
+      if: ${{ steps.vulnerability_scan.outcome == 'failure'}}
+      continue-on-error: true
+      run: |
+        echo "Vulnerability status: FAILED"
+        dotnet list package --vulnerable --include-transitive
       shell: bash
 
     - name: SonarQube Code Coverage Results

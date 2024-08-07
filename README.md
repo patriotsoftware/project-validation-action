@@ -55,6 +55,9 @@ Quality Gate will turn red and fail. Set to 'true' by default.
 #### 'ignore-failures' (optional)
 When value is 'sonar' it will ignore the Sonar Quality Gate
 
+#### 'vulnerability_codes' (optional)
+Pipe delimited vulnerabilities to look for on build.log output
+
 ## Sample Use
 
 ```
