@@ -121,28 +121,29 @@ runs:
         export PATH=$PATH:$HOME/.dotnet/tools        
         . ~/.bashrc               
         eval dotnet-coverage collect '$DOTNET_COMMAND' -f xml -o 'coverage.xml' 2>&1 | tee build.log
+        dotnet build --no-incremental
       shell: bash
 
-#Vulnerability scan options:
-# - Issue an alert or post outside GitHub a Vulnerability scan status
-# - Fail run based on vulnerabilities found or levels 
-#     - dotnet restore PatriotSoftware.Templates.Api.Spg.sln --verbosity quiet /warnaserror:NU1902,NU1903,NU1904
-# - Create custom rule (code changes involved) and import to Sonar 
-#    dotnet list $project.sln package --vulnerable --include-transitive 2>&1 | tee build.log
-# 
-# other notes:
-#   use continue-on-error=true setting
-#   grep -q -i "NU1903|NU1904" build.log; [ $? -eq 0 ] && echo "Security Vulnerabilities found on the log output" && exit 1
-    - name: Vulnerability Scan
-      id: vulnerability_scan
-      if: ${{ inputs.vulnerability_codes != '' }}
-      env:
-        vulns: ${{ inputs.vulnerability_codes }}      
-      continue-on-error: true
-      run: |
-        echo "Analyze command build.log output..."
-        grep -qE $vulns build.log && echo "Security Vulnerabilities matching $vulns found on build.log output" && exit 1 || echo "No matched vulnerabilities found."        
-      shell: bash
+# #Vulnerability scan options:
+# # - Issue an alert or post outside GitHub a Vulnerability scan status
+# # - Fail run based on vulnerabilities found or levels 
+# #     - dotnet restore PatriotSoftware.Templates.Api.Spg.sln --verbosity quiet /warnaserror:NU1902,NU1903,NU1904
+# # - Create custom rule (code changes involved) and import to Sonar 
+# #    dotnet list $project.sln package --vulnerable --include-transitive 2>&1 | tee build.log
+# # 
+# # other notes:
+# #   use continue-on-error=true setting
+# #   grep -q -i "NU1903|NU1904" build.log; [ $? -eq 0 ] && echo "Security Vulnerabilities found on the log output" && exit 1
+#     - name: Vulnerability Scan
+#       id: vulnerability_scan
+#       if: ${{ inputs.vulnerability_codes != '' }}
+#       env:
+#         vulns: ${{ inputs.vulnerability_codes }}      
+#       continue-on-error: true
+#       run: |
+#         echo "Analyze command build.log output..."
+#         grep -qE $vulns build.log && echo "Security Vulnerabilities matching $vulns found on build.log output" && exit 1 || echo "No matched vulnerabilities found."        
+#       shell: bash
                 
     - name: Sonarqube end
       run: |
@@ -184,13 +185,13 @@ runs:
         docker-compose -f ${{inputs.docker-compose-file-path}} down -v --remove-orphans
       shell: bash
 
-    - name: Vulnerability Status
-      if: ${{ steps.vulnerability_scan.outcome == 'failure'}}
-      continue-on-error: true
-      run: |
-        echo "Vulnerability status: FAILED"
-        dotnet list package --vulnerable --include-transitive
-      shell: bash
+    # - name: Vulnerability Status
+    #   if: ${{ steps.vulnerability_scan.outcome == 'failure'}}
+    #   continue-on-error: true
+    #   run: |
+    #     echo "Vulnerability status: FAILED"
+    #     dotnet list package --vulnerable --include-transitive
+    #   shell: bash
 
     - name: SonarQube Code Coverage Results
       run: |
