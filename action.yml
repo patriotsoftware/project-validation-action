@@ -64,7 +64,7 @@ runs:
     - name: Dotnet Sonar Scanner Install
       run: |
         if dotnet tool list -g | grep -q sonarscanner; then
-          echo "Sonar Scanner Already Installed"
+          echo "Sonar Scanner previously Installed"
         else
           dotnet tool install --global dotnet-sonarscanner --version ${{inputs.sonar-tool-version}}
           echo "Sonar Scanner now installed."
@@ -74,7 +74,7 @@ runs:
     - name: Dotnet Coverage Install
       run: | 
         if dotnet tool list -g | grep -q dotnet-coverage; then
-          echo "Dotnet Coverage Already Installed"
+          echo "Dotnet Coverage previously Installed"
         else
           dotnet tool install -g dotnet-coverage
           echo "Dotnet Coverage now installed."
@@ -86,6 +86,7 @@ runs:
 
     - name: Sonarqube Run
       run: |
+        echo "Sonarqube Run"
         export PATH=$PATH:$HOME/.dotnet/tools
         dotnet sonarscanner begin /k:"SynergyDataSystems_${{ inputs.github-repo-name }}" /d:sonar.scm.revision=$GITHUB_SHA /d:sonar.token=${{ inputs.sonar-token }} /d:sonar.host.url=https://sonar.dev-internal.patriotsoftware.com /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml /d:sonar.verbose=false
       shell: bash
@@ -143,12 +144,13 @@ runs:
         vulns: ${{ inputs.vulnerability_codes }}      
       continue-on-error: true
       run: |
-        echo "Analyze command build.log output..."
+        echo "Vulnerability Scan command build.log output..."
         grep -qE $vulns build.log && echo "Security Vulnerabilities matching $vulns found on build.log output" && exit 1 || echo "No matched vulnerabilities found."        
       shell: bash
                 
     - name: Sonarqube end
       run: |
+        echo "Sonarqube end"
         export PATH=$PATH:$HOME/.dotnet/tools
         . ~/.bashrc
         dotnet sonarscanner end /d:sonar.token="${{ inputs.sonar-token }}"
