@@ -111,7 +111,7 @@ runs:
           echo "Using local.runsettings file."          
           COMMAND_ARGS+=" --settings:$TESTS_PATH$LOCAL_RUNSETTINGS"          
         fi  
-        DOTNET_COMMAND=$(echo dotnet test --logger '"trx;LogFileName=test-results.trx"' --verbosity normal --configuration Release $COMMAND_ARGS)       
+        DOTNET_COMMAND=$(echo dotnet test --logger '"trx;LogFileName=test-results.trx"' --verbosity quiet --configuration Release $COMMAND_ARGS)       
         
         echo "running dotnet tests and code coverage....."    
         echo "COMMAND: dotnet-coverage collect '$DOTNET_COMMAND' -f xml -o 'coverage.xml'" 
