@@ -45,6 +45,9 @@ inputs:
     description: 'set to true if you wish to fail this run when the Quality Gate is red'
     required: false
     default: true
+  log-level:
+    description: 'Log-level for dotnet test command. Default is quiet'
+    default: 'quiet'
   ignore-failures:
     description: 'Ignore Sonar Quality Gate. Set sonar'
     required: false
@@ -106,12 +109,13 @@ runs:
         echo "setting variables for dotnet tests and code coverage..."          
         export LOCAL_RUNSETTINGS="${{ inputs.local-runsettings-filename }}"
         export TESTS_PATH="${{ inputs.tests-path }}"
-        export COMMAND_ARGS='${{ inputs.dotnet-test-command-args }}'    
-         if [ $LOCAL_RUNSETTINGS != "NONE" ]; then
+        export COMMAND_ARGS='${{ inputs.dotnet-test-command-args }}' 
+        export LOG_LEVEL='${{ inputs.log-level }}'   
+        if [ $LOCAL_RUNSETTINGS != "NONE" ]; then
           echo "Using local.runsettings file."          
           COMMAND_ARGS+=" --settings:$TESTS_PATH$LOCAL_RUNSETTINGS"          
         fi  
-        DOTNET_COMMAND=$(echo dotnet test --logger '"trx;LogFileName=test-results.trx"' --verbosity quiet --configuration Release $COMMAND_ARGS)       
+        DOTNET_COMMAND=$(echo dotnet test --logger '"trx;LogFileName=test-results.trx"' --verbosity $LOG_LEVEL --configuration Release $COMMAND_ARGS)       
         
         echo "running dotnet tests and code coverage....."    
         echo "COMMAND: dotnet-coverage collect '$DOTNET_COMMAND' -f xml -o 'coverage.xml'" 
