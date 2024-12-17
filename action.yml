@@ -111,7 +111,7 @@ runs:
           echo "Using local.runsettings file."          
           COMMAND_ARGS+=" --settings:$TESTS_PATH$LOCAL_RUNSETTINGS"          
         fi  
-        DOTNET_COMMAND=$(echo dotnet test --logger '"trx;LogFileName=test-results.trx"' --configuration Release $COMMAND_ARGS)       
+        DOTNET_COMMAND=$(echo dotnet test --logger '"trx;LogFileName=test-results.trx"' --verbosity normal --configuration Release $COMMAND_ARGS)       
         
         echo "running dotnet tests and code coverage....."    
         echo "COMMAND: dotnet-coverage collect '$DOTNET_COMMAND' -f xml -o 'coverage.xml'" 
@@ -133,16 +133,16 @@ runs:
 # other notes:
 #   use continue-on-error=true setting
 #   grep -q -i "NU1903|NU1904" build.log; [ $? -eq 0 ] && echo "Security Vulnerabilities found on the log output" && exit 1
-    # - name: Vulnerability Scan
-    #   id: vulnerability_scan
-    #   if: ${{ inputs.vulnerability_codes != '' }}
-    #   env:
-    #     vulns: ${{ inputs.vulnerability_codes }}      
-    #   continue-on-error: true
-    #   run: |
-    #     echo "Analyze command build.log output..."
-    #     grep -qE $vulns build.log && echo "Security Vulnerabilities matching $vulns found on build.log output" && exit 1 || echo "No matched vulnerabilities found."        
-    #   shell: bash
+    - name: Vulnerability Scan
+      id: vulnerability_scan
+      if: ${{ inputs.vulnerability_codes != '' }}
+      env:
+        vulns: ${{ inputs.vulnerability_codes }}      
+      continue-on-error: true
+      run: |
+        echo "Analyze command build.log output..."
+        grep -qE $vulns build.log && echo "Security Vulnerabilities matching $vulns found on build.log output" && exit 1 || echo "No matched vulnerabilities found."        
+      shell: bash
                 
     - name: Sonarqube end
       run: |
@@ -176,14 +176,6 @@ runs:
         name: Project Validation Test Results            
         path: "${{ inputs.tests-path }}**/*.trx"
         reporter: dotnet-trx
-
-    - name: Upload Tests
-      if: failure()
-      uses: actions/upload-artifact@v4
-      with:
-        name: all_tests
-        path: "${{ inputs.tests-path }}**/*.trx"
-        if-no-files-found: ignore
 
     - name: Stop Containerized Dependencies
       if: ${{ (inputs.use-dependencies == 'true') && always() }}
