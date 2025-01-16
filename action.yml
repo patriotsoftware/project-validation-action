@@ -85,6 +85,7 @@ runs:
       shell: bash
 
     - name: Check Sonar Status
+      shell: bash
       run: |
         URL="https://sonar.dev-internal.patriotsoftware.com/api/server/version"
         WAIT_TIME=30  # Time to wait in seconds between retries
