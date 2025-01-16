@@ -84,6 +84,24 @@ runs:
         fi
       shell: bash
 
+    - name: Check Sonar Status
+      run: |
+        URL="https://sonar.dev-internal.patriotsoftware.com/api/server/version"
+        WAIT_TIME=30  # Time to wait in seconds between retries
+        
+        while true; do
+          # Perform the curl request and capture the HTTP status code
+          HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}" "$URL")
+        
+          if [ "$HTTP_STATUS" -ne 503 ]; then
+            echo "Success: Received HTTP status $HTTP_STATUS"
+            break
+          else
+            echo "Service unavailable (503). Retrying in $WAIT_TIME seconds..."
+            sleep $WAIT_TIME
+          fi
+        done
+
     - name: Sonarqube Run
       run: |
         export PATH=$PATH:$HOME/.dotnet/tools
