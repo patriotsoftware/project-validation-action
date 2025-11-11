@@ -187,6 +187,7 @@ runs:
         SONAR_TOKEN: ${{ inputs.sonar-token }}
       with:
         scanMetadataReportFile: .sonarqube/out/.sonar/report-task.txt
+        pollingTimeoutSec: 600 # 300 is default
 
     - name: Output Docker Container Logs
       uses: jwalton/gh-docker-logs@v2
