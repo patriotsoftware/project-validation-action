@@ -106,7 +106,7 @@ runs:
     - name: Sonarqube Run
       run: |
         export PATH=$PATH:$HOME/.dotnet/tools
-        dotnet sonarscanner begin /k:"SynergyDataSystems_${{ inputs.github-repo-name }}" /d:sonar.scm.revision=$GITHUB_SHA /d:sonar.token=${{ inputs.sonar-token }} /d:sonar.host.url=https://sonar.dev-internal.patriotsoftware.com /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml /d:sonar.verbose=false
+        dotnet sonarscanner begin /k:"SynergyDataSystems_${{ inputs.github-repo-name }}" /d:sonar.scm.revision=$GITHUB_SHA /d:sonar.token=${{ inputs.sonar-token }} /d:sonar.host.url=https://sonar.dev-internal.patriotsoftware.com /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml /d:sonar.verbose=false /d:sonar.scanner.responseTimeout=300
       shell: bash
         
     - name: Containerized Dependencies   
