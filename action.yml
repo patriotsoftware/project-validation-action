@@ -127,6 +127,12 @@ runs:
         path: "${{ inputs.tests-path }}**/*.trx"
         reporter: dotnet-trx
 
+    #Vulnerability scan options:
+    # - Issue an alert or post outside GitHub a Vulnerability scan status
+    # - Fail run based on vulnerabilities found or levels 
+    #     - dotnet restore PatriotSoftware.Templates.Api.Spg.sln --verbosity quiet /warnaserror:NU1902,NU1903,NU1904
+    # - Create custom rule (code changes involved) and import to Sonar 
+    #    dotnet list $project.sln package --vulnerable --include-transitive 2>&1 | tee build.log
     - name: Vulnerability Scan
       id: vulnerability_scan
       if: ${{ inputs.vulnerability_codes != '' }}
