@@ -7,9 +7,8 @@ inputs:
     required: true
     default: ''
   sonar-tool-version:
-    description: 'Sonar tool version'
+    description: 'Deprecated — no longer has any effect.'
     required: false
-    default: '5.13.0'
   use-dependencies:
     description: 'Use Docker to run dependencies.'
     required: false
@@ -19,9 +18,8 @@ inputs:
     required: false
     default: 'docker-compose/test-dependencies-compose.yml'  
   sonar-token:
-    description: 'Sonar Token'
+    description: 'Deprecated — no longer has any effect.'
     required: false
-    default: ''
   path-to-repo-root:
     description: 'Path to Repo Root'
     required: false
@@ -39,20 +37,17 @@ inputs:
     required: false
     default: 'local.runsettings'
   upload-sonar-results:
-    description: 'Whether to upload Sonar results as an artifact'
+    description: 'Deprecated — no longer has any effect.'
     required: false
-    default: true
   fail-on-failure:
-    description: 'set to true if you wish to fail this run when the Quality Gate is red'
+    description: 'Deprecated — no longer has any effect.'
     required: false
-    default: true
   log-level:
     description: 'Log-level for dotnet test command. Default is quiet'
     default: 'quiet'
   ignore-failures:
-    description: 'Ignore Sonar Quality Gate. Set sonar'
+    description: 'Deprecated — no longer has any effect.'
     required: false
-    default: ''
   vulnerability_codes:
     description: 'Pipe delimited vulnerabilities to look for on build.log output'
     default: 'NU1902|NU1903|NU1904'
@@ -60,10 +55,20 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - name: Warn deprecated Sonar inputs
+      shell: bash
+      run: |
+        [ -n "${{ inputs.sonar-token }}" ]          && echo "::notice::sonar-token is deprecated and has no effect — remove it from your workflow call."
+        [ -n "${{ inputs.sonar-tool-version }}" ]   && echo "::notice::sonar-tool-version is deprecated and has no effect — remove it from your workflow call."
+        [ -n "${{ inputs.upload-sonar-results }}" ] && echo "::notice::upload-sonar-results is deprecated and has no effect — remove it from your workflow call."
+        [ -n "${{ inputs.fail-on-failure }}" ]      && echo "::notice::fail-on-failure is deprecated and has no effect — remove it from your workflow call."
+        [ -n "${{ inputs.ignore-failures }}" ]      && echo "::notice::ignore-failures is deprecated and has no effect — remove it from your workflow call."
+        true
+
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0  # Disable shallow-clone so Sonar can do git-blame
+        fetch-depth: 0  # Disable shallow-clone so we can git-blame
     
 
     - name: Dotnet Coverage Install
