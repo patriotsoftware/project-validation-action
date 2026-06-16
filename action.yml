@@ -1,5 +1,5 @@
-name: 'Sonar Project Validation'
-description: 'Run Sonar and Tests to Validate Quality'
+name: 'Project Validation'
+description: 'Run Tests to Validate Quality'
 
 inputs:
   github-repo-name:
@@ -20,7 +20,8 @@ inputs:
     default: 'docker-compose/test-dependencies-compose.yml'  
   sonar-token:
     description: 'Sonar Token'
-    required: true 
+    required: false
+    default: ''
   path-to-repo-root:
     description: 'Path to Repo Root'
     required: false
@@ -64,15 +65,6 @@ runs:
       with:
         fetch-depth: 0  # Disable shallow-clone so Sonar can do git-blame
     
-    - name: Dotnet Sonar Scanner Install
-      run: |
-        if dotnet tool list -g | grep -q sonarscanner; then
-          echo "Sonar Scanner Already Installed"
-        else
-          dotnet tool install --global dotnet-sonarscanner --version ${{inputs.sonar-tool-version}}
-          echo "Sonar Scanner now installed."
-        fi
-      shell: bash
 
     - name: Dotnet Coverage Install
       run: | 
@@ -84,30 +76,6 @@ runs:
         fi
       shell: bash
 
-    - name: Check Sonar Status
-      shell: bash
-      run: |
-        URL="https://sonar.dev-internal.patriotsoftware.com/api/server/version"
-        WAIT_TIME=30  # Time to wait in seconds between retries
-        
-        while true; do
-          # Perform the curl request and capture the HTTP status code
-          HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}" "$URL")
-        
-          if [ "$HTTP_STATUS" -ne 503 ]; then
-            echo "Success: Received HTTP status $HTTP_STATUS"
-            break
-          else
-            echo "Service unavailable (503). Retrying in $WAIT_TIME seconds..."
-            sleep $WAIT_TIME
-          fi
-        done
-
-    - name: Sonarqube Run
-      run: |
-        export PATH=$PATH:$HOME/.dotnet/tools
-        dotnet sonarscanner begin /k:"SynergyDataSystems_${{ inputs.github-repo-name }}" /d:sonar.scm.revision=$GITHUB_SHA /d:sonar.token=${{ inputs.sonar-token }} /d:sonar.host.url=https://sonar.dev-internal.patriotsoftware.com /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml /d:sonar.verbose=false
-      shell: bash
         
     - name: Containerized Dependencies   
       if: ${{ (inputs.use-dependencies == 'true') && (inputs.path-to-repo-root == '') }}    
@@ -146,48 +114,6 @@ runs:
         eval dotnet-coverage collect '$DOTNET_COMMAND' -f xml -o 'coverage.xml' 2>&1 | tee build.log
       shell: bash
 
-#Vulnerability scan options:
-# - Issue an alert or post outside GitHub a Vulnerability scan status
-# - Fail run based on vulnerabilities found or levels 
-#     - dotnet restore PatriotSoftware.Templates.Api.Spg.sln --verbosity quiet /warnaserror:NU1902,NU1903,NU1904
-# - Create custom rule (code changes involved) and import to Sonar 
-#    dotnet list $project.sln package --vulnerable --include-transitive 2>&1 | tee build.log
-# 
-# other notes:
-#   use continue-on-error=true setting
-#   grep -q -i "NU1903|NU1904" build.log; [ $? -eq 0 ] && echo "Security Vulnerabilities found on the log output" && exit 1
-    - name: Vulnerability Scan
-      id: vulnerability_scan
-      if: ${{ inputs.vulnerability_codes != '' }}
-      env:
-        vulns: ${{ inputs.vulnerability_codes }}      
-      continue-on-error: true
-      run: |
-        echo "Analyze command build.log output..."
-        grep -qE $vulns build.log && echo "Security Vulnerabilities matching $vulns found on build.log output" && exit 1 || echo "No matched vulnerabilities found."        
-      shell: bash
-                
-    - name: Sonarqube end
-      run: |
-        export PATH=$PATH:$HOME/.dotnet/tools
-        . ~/.bashrc
-        dotnet sonarscanner end /d:sonar.token="${{ inputs.sonar-token }}"
-      shell: bash
-
-    - uses: actions/upload-artifact@v4
-      if: ${{ inputs.upload-sonar-results == 'true' }}
-      with:
-        name: sonar-report
-        path: .sonarqube/out/.sonar/report-task.txt
-
-    - name: SonarQube Quality Gate check
-      uses: sonarsource/sonarqube-quality-gate-action@master
-      if: ${{ (inputs.fail-on-failure == 'true') || (inputs.ignore-failures != 'sonar') }}
-      env:
-        SONAR_TOKEN: ${{ inputs.sonar-token }}
-      with:
-        scanMetadataReportFile: .sonarqube/out/.sonar/report-task.txt
-        pollingTimeoutSec: 1800 # 300 is default
 
     - name: Output Docker Container Logs
       uses: jwalton/gh-docker-logs@v2
@@ -201,24 +127,26 @@ runs:
         path: "${{ inputs.tests-path }}**/*.trx"
         reporter: dotnet-trx
 
+    #Vulnerability scan options:
+    # - Issue an alert or post outside GitHub a Vulnerability scan status
+    # - Fail run based on vulnerabilities found or levels 
+    #     - dotnet restore PatriotSoftware.Templates.Api.Spg.sln --verbosity quiet /warnaserror:NU1902,NU1903,NU1904
+    # - Create custom rule (code changes involved) and import to Sonar 
+    #    dotnet list $project.sln package --vulnerable --include-transitive 2>&1 | tee build.log
+    - name: Vulnerability Scan
+      id: vulnerability_scan
+      if: ${{ inputs.vulnerability_codes != '' }}
+      env:
+        vulns: ${{ inputs.vulnerability_codes }}
+      continue-on-error: true
+      run: |
+        echo "Analyze command build.log output..."
+        grep -qE $vulns build.log && echo "Security Vulnerabilities matching $vulns found on build.log output" && exit 1 || echo "No matched vulnerabilities found."
+      shell: bash
+
     - name: Stop Containerized Dependencies
       if: ${{ (inputs.use-dependencies == 'true') && always() }}
       run: |
         echo "Containerized Dependencies: Stopping Docker Containers"
         docker-compose -f ${{inputs.docker-compose-file-path}} down -v --remove-orphans
-      shell: bash
-
-    - name: Vulnerability Status
-      if: ${{ steps.vulnerability_scan.outcome == 'failure'}}
-      continue-on-error: true
-      run: |
-        echo "Vulnerability status: FAILED"
-        dotnet list package --vulnerable --include-transitive
-      shell: bash
-
-    - name: SonarQube Code Coverage Results
-      run: |
-        export BRANCH_NAME=${GITHUB_REF#refs/heads/} 
-        export REPO_NAME=${{ inputs.github-repo-name }}
-        echo "SonarQube Code Coverage Results: https://sonar.dev-internal.patriotsoftware.com/dashboard?branch=$BRANCH_NAME&id=SynergyDataSystems_$REPO_NAME"
       shell: bash
